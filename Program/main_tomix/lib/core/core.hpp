@@ -1,7 +1,8 @@
-#ifndef CORE_HPP
-#define CORE_HPP
+#ifndef __CORE__
+#define __CORE__
 
 #include <Arduino.h>
+#include "MyMath.hpp"
 
 // Core Pins
 namespace CorePins {
@@ -41,8 +42,5 @@ const uint8_t ADC_1 = 27;
 const uint8_t ADC_2 = 28;
 
 } // namespace CorePins
-
-// PWM Frequency
-const int PWM_FREQ = 100 * 10E3; // 100kHz
 
 #endif

@@ -4,7 +4,7 @@
 void setup() {
     pinMode(CorePins::Motor1, OUTPUT);
     pinMode(CorePins::Motor2, OUTPUT);
-    analogWriteFreq(PWM_FREQ);
+    analogWriteFreq(100 * 10E3);
     analogWriteRange(4096);
 }
 void loop() {
