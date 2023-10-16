@@ -3399,7 +3399,7 @@
     (property "Reference" "D9" (at 92.075 191.77 90)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Value" "D" (at 92.075 194.31 90)
+    (property "Value" "ＧＳ１０１０ＦＬ" (at 92.075 194.31 90)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Footprint" "Diode_SMD:D_SOD-123F" (at 89.535 193.04 0)
