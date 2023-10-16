@@ -107,6 +107,9 @@
   "C_Cpp_Runner.useLinkTimeOptimization": false,
   "C_Cpp_Runner.msvcSecureNoWarnings": false,
   "files.associations": {
-    "random": "cpp"
+    "random": "cpp",
+    "memory": "cpp",
+    "future": "cpp",
+    "optional": "cpp"
   }
 }
