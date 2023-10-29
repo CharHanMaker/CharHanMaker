@@ -2,12 +2,12 @@
 #define LPF_H
 
 #include <Arduino.h>
-
+#include "timer.h"
 class LPF {
   private:
     float timeConstant;
     float prevValue;
-    Timer timer;
+    timer tim;
 
   public:
     LPF(float _timeConstant);

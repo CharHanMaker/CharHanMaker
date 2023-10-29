@@ -110,6 +110,9 @@
     "random": "cpp",
     "memory": "cpp",
     "future": "cpp",
-    "optional": "cpp"
+    "optional": "cpp",
+    "cmath": "cpp",
+    "compare": "cpp",
+    "*.tcc": "cpp"
   }
 }
