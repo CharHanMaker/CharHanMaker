@@ -1,6 +1,5 @@
 #include "MultipleAS5600.hpp"
 
-
 MultipleAS5600::MultipleAS5600(TwoWire &_i2c, uint8_t _muxAddress = MUX_ADDR, uint8_t _sensorQty = 2)
     : muxAddress(MUX_ADDR),
       sensorQty(_sensorQty),
@@ -9,7 +8,9 @@ MultipleAS5600::MultipleAS5600(TwoWire &_i2c, uint8_t _muxAddress = MUX_ADDR, ui
 }
 
 void MultipleAS5600::begin() {
-    // なんか後で書くか
+    for (size_t i = 0; i < 8; i++) {
+        velTimer[i].reset();
+    }
 }
 
 uint16_t MultipleAS5600::readDegree(uint8_t _sensorNumber) {
@@ -36,8 +37,30 @@ uint16_t MultipleAS5600::readDegree(uint8_t _sensorNumber) {
         uint8_t angle_l = Wire.read();
         rawAngle = (0x0F & angle_h) << 8 | angle_l;
         rawAngle = rawAngle * 360 / 4096; // 12bit -> 360deg
+        angleArray[_sensorNumber] = rawAngle;
     } else {
         return 9999; // error
     }
     return rawAngle;
+}
+
+float MultipleAS5600::getVelocity(uint8_t _sensorNumber) {
+    if (_sensorNumber > 7) _sensorNumber = 7;
+    if (angleArray[_sensorNumber] == 9999) return 9999;     // error
+    float shAngle = DEG_TO_RAD * angleArray[_sensorNumber]; // [rad]
+    float dt = (float)velTimer[_sensorNumber].read_us() / 1000000;
+    velTimer[_sensorNumber].reset();
+    float angleDiff = shAnglePrev[_sensorNumber] - shAngle;
+    if (angleDiff > PI) {
+        angleDiff -= 2 * PI;
+    } else if (angleDiff < -PI) {
+        angleDiff += 2 * PI;
+    }
+    float angularVelocity = angleDiff / dt;
+    if (abs(angleDiff) > PI && angularVelocity != 0) {
+        angularVelocity += (angularVelocity > 0) ? -2 * PI / dt : 2 * PI / dt;
+    }
+    angularVelocity = velocityLPF[_sensorNumber].update(angularVelocity);
+    shAnglePrev[_sensorNumber] = shAngle;
+    return angularVelocity;
 }
