@@ -2,7 +2,7 @@
 #define __CORE__
 
 #include <Arduino.h>
-#include "MyMath.hpp"
+
 
 // Core Pins
 namespace CorePins {
