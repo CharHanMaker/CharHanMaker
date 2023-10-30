@@ -3,15 +3,19 @@
 
 #include <./Modes/Mode.hpp>
 
-class MainMode : public Mode, Devices {
-    using Devices::Devices;
+class MainMode : public Mode, Robot {
+    using Robot::Robot;
 
   public:
     MainMode(char letter, const char name[]) : Mode(letter, name) {}
 
-    void before() {
+    void init() {
         deviceBegin();
     }
+
+    void before() {
+    }
+
     void loop() {
         int angle1, angle2, time;
         angle1 = AbsEncorders.readDegree(0);     // 0番目のエンコーダの角度を取得
@@ -22,6 +26,7 @@ class MainMode : public Mode, Devices {
         a++;
         Serial.printf("%d, %d, vel:%.2f, time:%dus %d\n", angle1, angle2, vel, time, a);
     }
+
     void after() {
     }
 
