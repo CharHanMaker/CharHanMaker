@@ -39,14 +39,14 @@ uint16_t MultipleAS5600::readDegree(uint8_t _sensorNumber) {
         rawAngle = rawAngle * 360 / 4096; // 12bit -> 360deg
         angleArray[_sensorNumber] = rawAngle;
     } else {
-        return 9999; // error
+        return 361; // error
     }
     return rawAngle;
 }
 
 float MultipleAS5600::getVelocity(uint8_t _sensorNumber) {
     if (_sensorNumber > 7) _sensorNumber = 7;
-    if (angleArray[_sensorNumber] == 9999) return 9999;     // error
+    if (angleArray[_sensorNumber] == 361) return 361;     // error
     float shAngle = DEG_TO_RAD * angleArray[_sensorNumber]; // [rad]
     float dt = (float)velTimer[_sensorNumber].read_us() / 1000000;
     velTimer[_sensorNumber].reset();

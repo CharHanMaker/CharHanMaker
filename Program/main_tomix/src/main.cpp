@@ -11,10 +11,9 @@ Mode *modes[MODE_QTY] = {&mainMode, &tempMode};
 Mode *currentMode = &mainMode;
 
 void setup() {
-    Wire.setClock(400000); // I2C の通信速度 : 400k Hz
-    Wire.begin();
     Serial.begin(115200);
-
+    Wire.setClock(400000); // 400k Hz
+    Wire.begin();
     mainMode.init();
     mainMode.before();
 }

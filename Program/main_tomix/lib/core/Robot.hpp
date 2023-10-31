@@ -29,8 +29,43 @@ class Robot {
     sensors_t sensors;
 
     void deviceBegin() {
+        // シリアル通信の設定
+        Serial.begin(115200);
+
+        // I2Cの設定
+        Wire.setClock(400000); // I2C の通信速度 : 400k Hz
+        Wire.begin();
         AbsEncorders.begin();
+
+        // ピンの設定
+        pinMode(CorePins::EncPortA1, INPUT);
+        pinMode(CorePins::EncPortB1, INPUT);
+        pinMode(CorePins::EncPortA2, INPUT);
+        pinMode(CorePins::EncPortB2, INPUT);
+        pinMode(CorePins::ENG_SW, INPUT);
+        pinMode(CorePins::SW, INPUT);
+        pinMode(CorePins::MotorA, OUTPUT);
+        pinMode(CorePins::MotorB, OUTPUT);
+        pinMode(CorePins::Debug_LED, OUTPUT);
+        pinMode(CorePins::Alive_LED, OUTPUT);
+
+        // モーターのPWM周波数を設定
+        analogWriteFreq(25000); // 25kHz
+        analogWriteRange(65535);
     }
 };
 
+TickTwo alive(
+    []() {
+        digitalWrite(CorePins::Alive_LED, !digitalRead(CorePins::Alive_LED));
+    },
+    100, 0, MILLIS);
+
+void setup1() {
+    alive.start();
+}
+
+void loop1() {
+    alive.update();
+}
 #endif

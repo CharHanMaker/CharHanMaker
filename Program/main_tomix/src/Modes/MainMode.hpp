@@ -9,22 +9,25 @@ class MainMode : public Mode, Robot {
   public:
     MainMode(char letter, const char name[]) : Mode(letter, name) {}
 
+    int i = 0;
+
     void init() {
+		
         deviceBegin();
+
+		
     }
 
     void before() {
     }
 
     void loop() {
-        int angle1, angle2, time;
-        angle1 = AbsEncorders.readDegree(0);     // 0番目のエンコーダの角度を取得
-        angle2 = AbsEncorders.readDegree(1);     // 1番目のエンコーダの角度を取得
-        float vel = AbsEncorders.getVelocity(1); // 1番目のエンコーダの角速度を取得[rad/s]
-        time = Time.read_us();
-        Time.reset(); //
-        a++;
-        Serial.printf("%d, %d, vel:%.2f, time:%dus %d\n", angle1, angle2, vel, time, a);
+        i++;
+        int power = 65535 / 2 * MyMath::sinDeg(i) + 65535 / 2;
+        analogWrite(CorePins::MotorA, power);
+        analogWrite(CorePins::MotorB, power);
+        delay(10);
+        Serial.printf("i:%d\n", power);
     }
 
     void after() {
