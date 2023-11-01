@@ -9,15 +9,10 @@ class MainMode : public Mode, Robot {
   public:
     MainMode(char letter, const char name[]) : Mode(letter, name) {}
 
-    int i = 0;
-
+    int i = 270;
     void init() {
-		
         deviceBegin();
-
-		
     }
-
     void before() {
     }
 

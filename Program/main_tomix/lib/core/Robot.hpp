@@ -19,13 +19,9 @@ typedef struct {
 
 class Robot {
   public:
-    Robot()
-        : AbsEncorders(Wire, 0x70, 2) {}
+    Robot() : AbsEncorders(Wire, 0x70, 2) {}
     timer Time;
     MultipleAS5600 AbsEncorders;
-
-    //
-    uint8_t a = 0;
     sensors_t sensors;
 
     void deviceBegin() {
@@ -50,7 +46,7 @@ class Robot {
         pinMode(CorePins::Alive_LED, OUTPUT);
 
         // モーターのPWM周波数を設定
-        analogWriteFreq(25000); // 25kHz
+        analogWriteFreq(2000); // 25kHz
         analogWriteRange(65535);
     }
 };
@@ -59,7 +55,7 @@ TickTwo alive(
     []() {
         digitalWrite(CorePins::Alive_LED, !digitalRead(CorePins::Alive_LED));
     },
-    100, 0, MILLIS);
+    500, 0, MILLIS);
 
 void setup1() {
     alive.start();
