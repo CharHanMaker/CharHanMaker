@@ -14,7 +14,8 @@ class TempMode : public Mode, Robot {
     }
 
     void loop() {
-        Serial.printf("loop:%d\n", getModeLetter());
+        Serial.printf("loop:%d\n waiting for send 'M' ", getModeLetter());
+        delay(1000);
     }
 
     void after() {

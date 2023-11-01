@@ -10,15 +10,16 @@ class TempMode : public Mode, Robot {
     TempMode(char letter, const char name[]) : Mode(letter, name) {}
 
     void before() {
-        Serial.printf("before:%d\n", getModeLetter());
+        Serial.printf("before:%s\n", getModeLetter());
     }
 
     void loop() {
-        Serial.printf("loop:%d\n", getModeLetter());
+        Serial.printf("loop:%s\n", getModeLetter());
+        analogWrite(CorePins::MotorA, 0);
     }
 
     void after() {
-        Serial.printf("after:%d\n", getModeLetter());
+        Serial.printf("after:%s\n", getModeLetter());
     }
 
   private:

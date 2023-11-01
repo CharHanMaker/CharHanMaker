@@ -8,10 +8,9 @@ MainMode mainMode('M', "MainMode");
 TempMode tempMode('T', "TempMode");
 
 Mode *modes[MODE_QTY] = {&mainMode, &tempMode};
-Mode *currentMode = &mainMode;
+Mode *currentMode = &tempMode;
 
 void setup() {
-
     mainMode.init();
     mainMode.before();
 }
