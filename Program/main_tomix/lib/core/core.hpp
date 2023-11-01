@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 
-
 // Core Pins
 namespace CorePins {
 // UART
@@ -33,8 +32,8 @@ const uint8_t Servo2 = 19;
 const uint8_t Servo3 = 22;
 
 // PWM(Motor)
-const uint8_t Motor1 = 20;
-const uint8_t Motor2 = 21;
+const uint8_t MotorB = 20;
+const uint8_t MotorA = 21;
 
 // ADC
 const uint8_t ADC_0 = 26;
