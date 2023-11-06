@@ -17,22 +17,13 @@ class MainMode : public Mode, Robot {
     }
 
     void loop() {
-        // i++;
-        // int power = 65535 / 2 * MyMath::sinDeg(i) + 65535 / 2;
-        // analogWrite(CorePins::MotorA, power);
-        // analogWrite(CorePins::MotorB, power);
-        // delay(10);
-        // Serial.printf("i:%d\n", power);
-		analogWrite(CorePins::MotorA, 0);
-		delay(100);
-		Time.reset();
-		for(unsigned i = 0; i < 10000; ++i) {
-			analogWrite(CorePins::MotorA, 65535);
-			Serial.printf("%d,%f,%d\n",Time.read_us(),AbsEncorders.readDegree(0),AbsEncorders.getVelocity(0));
-		}
-		analogWrite(CorePins::MotorA, 0);
-		Serial.printf("end...Send T to continue\n");
-		delay(10000);
+        int angle1, angle2, time;
+        angle1 = AbsEncorders.readDegree(0);     // 0番目のエンコーダの角度を取得
+        angle2 = AbsEncorders.readDegree(1);     // 1番目のエンコーダの角度を取得
+        float vel = AbsEncorders.getVelocity(1); // 1番目のエンコーダの角速度を取得[rad/s]
+        time = Time.read_us();
+        Time.reset(); //
+        Serial.printf("%d, %d, vel:%.2f, time:%dus\n", angle1, angle2, vel, time);
     }
 
     void after() {
