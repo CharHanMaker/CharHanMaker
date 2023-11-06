@@ -4,6 +4,7 @@
 #include "Motor.hpp"
 #include "core.hpp"
 #include "timer.h"
+#include "MyMath.hpp"
 
 class Motor {
   public:
