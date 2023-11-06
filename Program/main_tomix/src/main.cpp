@@ -7,14 +7,15 @@
 
 MainMode mainMode('M', "MainMode");
 TempMode tempMode('T', "TempMode");
-SystemIdentificationMode systemidentificationMode('S', "SysIdMode");
+SystemIdentificationMode systemidentificationMode('S', "SI Mode");
 
 Mode *modes[MODE_QTY] = {&mainMode, &tempMode, &systemidentificationMode};
 Mode *currentMode = &tempMode;
 
 void setup() {
     mainMode.init();
-    mainMode.before();
+    tempMode.init();
+    systemidentificationMode.init();
 }
 
 void loop() {

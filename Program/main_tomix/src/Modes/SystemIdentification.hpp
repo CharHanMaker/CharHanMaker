@@ -9,28 +9,60 @@ class SystemIdentificationMode : public Mode, Robot {
   public:
     SystemIdentificationMode(char letter, const char name[]) : Mode(letter, name) {}
 
+    void init() {
+        deviceBegin();
+    }
+
     void before() {
         Serial.printf("before:%d\n", getModeLetter());
     }
 
-    void indentification() {
+    void loop() {
+        Serial.printf("loop:%d\n waiting for send 'M' ", getModeLetter());
+        // delay(1000);
+
+        Serial.println("Time[ms], Volt[V], Angle[rad], AngleVel[rad/s]");
+        // initialize
+        analogWrite(CorePins::MotorA, 0);
+        delay(100);
+        Time.reset();
+        interval.reset();
+        isDone = false;
+        f = 0.1;
+        Serial.println("Time[ms], Volt[V], Angle[degree], AngleVel[rad/s]");
+        while (!isDone) {
+            if (interval.read_ms() >= 2) {
+                interval.reset();
+                sysIdentification();
+            }
+        }
+
+        analogWrite(CorePins::MotorA, 0);
+        Serial.printf("end...Send T to continue\n");
+        delay(10000);
+        // float angle1 = AbsEncorders.readDegree(0); // 0番目のエンコーダの角度を取得
+        // float angle2 = AbsEncorders.readDegree(1); // 1番目のエンコーダの角度を取得
+        // float vel = AbsEncorders.getVelocity(0);   // 1番目のエンコーダの角速度を取得[rad/s]
+        // Serial.printf("%.2f, vel:%.2f, time:%dus\n", angle1, vel, time);
+        // delay(10);
+    }
+
+    void after() {
+        Serial.printf("after:%d\n", getModeLetter());
+    }
+
+    void sysIdentification() {
         float encCnt; // エンコーダのカウント
         float omega;  // 角速度[rad/s]
-        uint16_t theta;
-        int u_pwm;            // PWMのDuty比
-        static float u = 0;   // 入力
-        static float t = 0;   // 時間
-        static float f = 0.1; // 入力の周波数
+        float theta;
+        int u_pwm; // PWMのDuty比
 
+        // NOTE: なぜなのか！？0番目のエンコーダの角度を取得しないと1番目のエンコーダの角度が取得できないｗｗｗｗｗｗｗｗｗｗｗｗ
         theta = AbsEncorders.readDegree(0);
+        AbsEncorders.readDegree(1);
         omega = AbsEncorders.getVelocity(0);
 
-        // ログデータの出力
-        // Serial.print(u * 12, 4);
-        // Serial.print(" : ");
-        // Serial.println(omega, 4);
-
-        Serial.printf("%d, %.4f, %d, %.4f\n", Time.read_ms(), u * 12, theta, omega);
+        Serial.printf("%d, %.3f, %.3f, %.3f\n", Time.read_ms(), u * 12, theta, omega);
 
         t += Ts; // 時間の更新
 
@@ -58,39 +90,15 @@ class SystemIdentificationMode : public Mode, Robot {
         }
     }
 
-    void loop() {
-        // Serial.printf("loop:%d\n waiting for send 'M' ", getModeLetter());
-        // delay(1000);
-
-        Serial.println("Time[ms], Volt[V], Angle[rad], AngleVel[rad/s]");
-        // initialize
-        analogWrite(CorePins::MotorA, 0);
-        delay(100);
-        Time.reset();
-        interval.reset();
-        isDone = false;
-        Serial.println("Time[ms], Volt[V], Angle[degree], AngleVel[rad/s]");
-        while (!isDone) {
-            if (interval.read_ms() >= 2) {
-                interval.reset();
-                indentification();
-            }
-        }
-
-        analogWrite(CorePins::MotorA, 0);
-        Serial.printf("end...Send T to continue\n");
-        delay(10000);
-    }
-
-    void after() {
-        Serial.printf("after:%d\n", getModeLetter());
-    }
-
   private:
     timer interval;
     float Ts = 0.001;
 
     bool isDone = false;
+
+    float u = 0;   // 入力
+    float t = 0;   // 時間
+    float f = 0.1; // 入力の周波数
 };
 
 extern SystemIdentificationMode systemidentificationMode;
