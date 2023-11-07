@@ -24,14 +24,20 @@ class SystemIdentificationMode : public Mode, Robot {
         Serial.println("Time[ms], Volt[V], Angle[rad], AngleVel[rad/s]");
         // initialize
         analogWrite(CorePins::MotorA, 0);
+        for (size_t i = 0; i < 30; i++) {
+            AbsEncorders.readDegree(0);
+            AbsEncorders.readDegree(1);
+            delay(1);
+        }
         delay(100);
         Time.reset();
         interval.reset();
         isDone = false;
         f = 0.1;
         Serial.println("Time[ms], Volt[V], Angle[degree], AngleVel[rad/s]");
+
         while (!isDone) {
-            if (interval.read_ms() >= 2) {
+            if (interval.read_ms() >= 5) { // 周期依存 Ts = 0.005のとき5ms
                 interval.reset();
                 sysIdentification();
             }
@@ -66,8 +72,8 @@ class SystemIdentificationMode : public Mode, Robot {
 
         t += Ts; // 時間の更新
 
-        u = 0.5 * sin(2 * PI * f * t) + 0.5; // 入力の計算
-        u_pwm = int(u * 65535 / 2);          // 入力をPWMのDuty比に変換
+        u = 0.5 * sin(2 * PI * f * t + ofset) + 0.5; // 入力の計算
+        u_pwm = int(u * 65535 / 2);                  // 入力をPWMのDuty比に変換
 
         // モータドライバへの出力
         analogWrite(CorePins::MotorA, u_pwm);
@@ -92,13 +98,14 @@ class SystemIdentificationMode : public Mode, Robot {
 
   private:
     timer interval;
-    float Ts = 0.001;
+    float Ts = 0.005; // 周期[s]
 
     bool isDone = false;
 
     float u = 0;   // 入力
     float t = 0;   // 時間
     float f = 0.1; // 入力の周波数
+    const float ofset = -90 * DEG_TO_RAD;
 };
 
 extern SystemIdentificationMode systemidentificationMode;
