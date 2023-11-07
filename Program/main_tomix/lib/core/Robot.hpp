@@ -46,7 +46,7 @@ class Robot {
         pinMode(CorePins::Alive_LED, OUTPUT);
 
         // モーターのPWM周波数を設定
-        analogWriteFreq(10000); // 25kHz→2KHz
+        analogWriteFreq(10000); // 10KHzがちょうど良さそう
         analogWriteRange(65535);
     }
 };

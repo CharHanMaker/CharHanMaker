@@ -8,7 +8,7 @@
 
 #define MUX_ADDR 0x70    // TCA9548A default address
 #define AS5600_ADDR 0x36 // AS5600 default address
-#define LPF_COEFF 0.02   // LPF coefficient
+#define LPF_COEFF 0.05   // LPF coefficient
 
 class MultipleAS5600 {
   public:
