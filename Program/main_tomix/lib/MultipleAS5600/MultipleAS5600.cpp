@@ -13,7 +13,7 @@ void MultipleAS5600::begin() {
     }
 }
 
-uint16_t MultipleAS5600::readDegree(uint8_t _sensorNumber) {
+float MultipleAS5600::readDegree(uint8_t _sensorNumber) {
     // program Mux to read from correct port(0-7)
     if (_sensorNumber > 7) _sensorNumber = 7;
 
@@ -31,22 +31,22 @@ uint16_t MultipleAS5600::readDegree(uint8_t _sensorNumber) {
     Wire.endTransmission(false);
     Wire.requestFrom(0x36, 2);
     //     delayMicroseconds(10);
-    uint16_t rawAngle = 0;
+    float angle_f = 0;
     if (Wire.available()) {
         uint8_t angle_h = Wire.read();
         uint8_t angle_l = Wire.read();
-        rawAngle = (0x0F & angle_h) << 8 | angle_l;
-        rawAngle = rawAngle * 360 / 4096; // 12bit -> 360deg
-        angleArray[_sensorNumber] = rawAngle;
+        uint16_t rawAngle = (0x0F & angle_h) << 8 | angle_l;
+        angle_f = (float)rawAngle * 0.087890625; // 12bit -> 360.00deg
+        angleArray[_sensorNumber] = angle_f;
     } else {
         return 361; // error
     }
-    return rawAngle;
+    return angle_f;
 }
 
 float MultipleAS5600::getVelocity(uint8_t _sensorNumber) {
     if (_sensorNumber > 7) _sensorNumber = 7;
-    if (angleArray[_sensorNumber] == 361) return 361;     // error
+    if (angleArray[_sensorNumber] == 361) return 361;       // error
     float shAngle = DEG_TO_RAD * angleArray[_sensorNumber]; // [rad]
     float dt = (float)velTimer[_sensorNumber].read_us() / 1000000;
     velTimer[_sensorNumber].reset();
