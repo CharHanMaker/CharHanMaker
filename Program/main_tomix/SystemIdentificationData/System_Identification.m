@@ -21,7 +21,7 @@ file = "SIdata_1_average4_2023-11-07_controlable.csv";
 FR.u = readmatrix(file, "Range", [2 2 6297 2]); % Volt
 FR.y = readmatrix(file, "Range", [2 3 6297 3]); % omega
 
-FRdata = iddata(FR.y, FR.u, 0.002);
+FRdata = iddata(FR.y, FR.u, 0.005);
 FRdata.InputName = '電圧 [V]';
 FRdata.OutputName = '角速度 [rad/s]';
 figure(1);
