@@ -39,6 +39,7 @@ class Pidtest : public Mode, Robot {
                 float de = (e0 - e_pre) / interval.read_ms();                    // 誤差の微分を近似計算
                 integral_e = integral_e + (e0 + e_pre) * interval.read_ms() / 2; // 誤差の積分を近似計算
                 float u = Kp * e0 + Ki * integral_e + Kd * de;                   // 入力電圧
+                u *= -1;                                                         // -1倍ゲイン
 
                 if (u > 12)
                     u = 12;
