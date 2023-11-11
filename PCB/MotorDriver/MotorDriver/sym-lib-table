@@ -5,5 +5,4 @@
   (lib (name "DRV8701PRGER")(type "KiCad")(uri "/Users/tomixrm/Desktop/ロボ創造/CharHanMaker/PCB/MotorDriver/lib/DRV8701PRGER/DRV8701PRGER.kicad_sym")(options "")(descr ""))
   (lib (name "MCU_RaspberryPi_and_Boards")(type "KiCad")(uri "/Users/tomixrm/Desktop/ロボ創造/CharHanMaker/PCB/MotorDriver/lib/KiCad-RP-Pico-main/RP-Pico Libraries/MCU_RaspberryPi_and_Boards.kicad_sym")(options "")(descr ""))
   (lib (name "TPH11006NL")(type "KiCad")(uri "/Users/tomixrm/Desktop/ロボ創造/CharHanMaker/PCB/MotorDriver/lib/TPH11006NL/TPH11006NL.kicad_sym")(options "")(descr ""))
-  (lib (name "PKLCS1212E4001-R1")(type "KiCad")(uri "/Users/tomixrm/Desktop/ロボ創造/CharHanMaker/PCB/MotorDriver/lib/PKLCS1212E4001-R1/PKLCS1212E4001-R1.kicad_sym")(options "")(descr ""))
 )
