@@ -898,6 +898,9 @@
         (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/4a280754-c36a-47c1-95c1-18daa423d0e9"
           (reference "Q8") (unit 1)
         )
+        (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/b85d5b0f-2c56-44b1-9c6e-08bd1fa15ae1"
+          (reference "Q3") (unit 1)
+        )
       )
     )
   )
@@ -937,6 +940,9 @@
         (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/4a280754-c36a-47c1-95c1-18daa423d0e9"
           (reference "Q6") (unit 1)
         )
+        (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/b85d5b0f-2c56-44b1-9c6e-08bd1fa15ae1"
+          (reference "Q9") (unit 1)
+        )
       )
     )
   )
@@ -962,6 +968,9 @@
       (project "MotorDriver"
         (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/4a280754-c36a-47c1-95c1-18daa423d0e9"
           (reference "C2") (unit 1)
+        )
+        (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/b85d5b0f-2c56-44b1-9c6e-08bd1fa15ae1"
+          (reference "C12") (unit 1)
         )
       )
     )
@@ -992,6 +1001,9 @@
         (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/4a280754-c36a-47c1-95c1-18daa423d0e9"
           (reference "R1") (unit 1)
         )
+        (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/b85d5b0f-2c56-44b1-9c6e-08bd1fa15ae1"
+          (reference "R3") (unit 1)
+        )
       )
     )
   )
@@ -1017,6 +1029,9 @@
       (project "MotorDriver"
         (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/4a280754-c36a-47c1-95c1-18daa423d0e9"
           (reference "C3") (unit 1)
+        )
+        (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/b85d5b0f-2c56-44b1-9c6e-08bd1fa15ae1"
+          (reference "C11") (unit 1)
         )
       )
     )
@@ -1057,6 +1072,9 @@
         (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/4a280754-c36a-47c1-95c1-18daa423d0e9"
           (reference "Q5") (unit 1)
         )
+        (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/b85d5b0f-2c56-44b1-9c6e-08bd1fa15ae1"
+          (reference "Q4") (unit 1)
+        )
       )
     )
   )
@@ -1096,6 +1114,9 @@
         (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/4a280754-c36a-47c1-95c1-18daa423d0e9"
           (reference "Q7") (unit 1)
         )
+        (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/b85d5b0f-2c56-44b1-9c6e-08bd1fa15ae1"
+          (reference "Q2") (unit 1)
+        )
       )
     )
   )
@@ -1120,6 +1141,9 @@
       (project "MotorDriver"
         (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/4a280754-c36a-47c1-95c1-18daa423d0e9"
           (reference "#PWR03") (unit 1)
+        )
+        (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/b85d5b0f-2c56-44b1-9c6e-08bd1fa15ae1"
+          (reference "#PWR028") (unit 1)
         )
       )
     )
@@ -1146,6 +1170,9 @@
         (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/4a280754-c36a-47c1-95c1-18daa423d0e9"
           (reference "#PWR02") (unit 1)
         )
+        (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/b85d5b0f-2c56-44b1-9c6e-08bd1fa15ae1"
+          (reference "#PWR019") (unit 1)
+        )
       )
     )
   )
@@ -1170,6 +1197,9 @@
       (project "MotorDriver"
         (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/4a280754-c36a-47c1-95c1-18daa423d0e9"
           (reference "#PWR04") (unit 1)
+        )
+        (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/b85d5b0f-2c56-44b1-9c6e-08bd1fa15ae1"
+          (reference "#PWR020") (unit 1)
         )
       )
     )
@@ -1220,6 +1250,9 @@
         (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/4a280754-c36a-47c1-95c1-18daa423d0e9"
           (reference "U1") (unit 1)
         )
+        (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/b85d5b0f-2c56-44b1-9c6e-08bd1fa15ae1"
+          (reference "U2") (unit 1)
+        )
       )
     )
   )
@@ -1245,6 +1278,9 @@
         (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/4a280754-c36a-47c1-95c1-18daa423d0e9"
           (reference "#PWR05") (unit 1)
         )
+        (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/b85d5b0f-2c56-44b1-9c6e-08bd1fa15ae1"
+          (reference "#PWR021") (unit 1)
+        )
       )
     )
   )
@@ -1255,7 +1291,7 @@
     (property "Reference" "C1" (at 56.134 78.74 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Value" "`" (at 56.134 81.28 0)
+    (property "Value" "0.1u" (at 56.134 81.28 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Footprint" "Capacitor_SMD:C_0603_1608Metric" (at 54.3052 83.82 0)
@@ -1270,6 +1306,9 @@
       (project "MotorDriver"
         (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/4a280754-c36a-47c1-95c1-18daa423d0e9"
           (reference "C1") (unit 1)
+        )
+        (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/b85d5b0f-2c56-44b1-9c6e-08bd1fa15ae1"
+          (reference "C17") (unit 1)
         )
       )
     )
@@ -1295,6 +1334,9 @@
       (project "MotorDriver"
         (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/4a280754-c36a-47c1-95c1-18daa423d0e9"
           (reference "#PWR06") (unit 1)
+        )
+        (path "/f5374fcb-1759-4e83-8147-0b1bc8fc6833/b85d5b0f-2c56-44b1-9c6e-08bd1fa15ae1"
+          (reference "#PWR022") (unit 1)
         )
       )
     )
