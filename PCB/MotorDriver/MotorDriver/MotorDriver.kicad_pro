@@ -35,8 +35,8 @@
         "other_text_upright": false,
         "pads": {
           "drill": 0.0,
-          "height": 0.599999,
-          "width": 0.24
+          "height": 2.9972,
+          "width": 1.1176
         },
         "silk_line_width": 0.15,
         "silk_text_italic": false,
@@ -53,26 +53,6 @@
           "gap": 0.0,
           "via_gap": 0.0,
           "width": 0.0
-        },
-        {
-          "gap": 0.0,
-          "via_gap": 0.0,
-          "width": 0.0
-        },
-        {
-          "gap": 0.0,
-          "via_gap": 0.0,
-          "width": 0.0
-        },
-        {
-          "gap": 0.3,
-          "via_gap": 0.3,
-          "width": 0.0
-        },
-        {
-          "gap": 0.3,
-          "via_gap": 0.3,
-          "width": 0.3
         }
       ],
       "drc_exclusions": [],
@@ -192,27 +172,12 @@
         }
       ],
       "track_widths": [
-        0.0,
-        0.25,
-        1.0,
-        2.0
+        0.0
       ],
       "via_dimensions": [
         {
           "diameter": 0.0,
           "drill": 0.0
-        },
-        {
-          "diameter": 0.0,
-          "drill": 0.0
-        },
-        {
-          "diameter": 0.6,
-          "drill": 0.3
-        },
-        {
-          "diameter": 0.6,
-          "drill": 0.3
         }
       ],
       "zones_allow_external_fillets": false
@@ -473,7 +438,7 @@
         "microvia_drill": 0.1,
         "name": "POWER",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "schematic_color": "rgb(255, 90, 212)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.7,
         "via_diameter": 0.8,
         "via_drill": 0.6,
@@ -483,34 +448,9 @@
     "meta": {
       "version": 3
     },
-    "net_colors": {
-      "+12V": "rgb(255, 169, 187)",
-      "+3V3": "rgb(255, 124, 22)",
-      "+BATT": "rgb(244, 255, 27)"
-    },
+    "net_colors": null,
     "netclass_assignments": null,
-    "netclass_patterns": [
-      {
-        "netclass": "POWER",
-        "pattern": "GND"
-      },
-      {
-        "netclass": "POWER",
-        "pattern": "+3V3"
-      },
-      {
-        "netclass": "POWER",
-        "pattern": "+12V"
-      },
-      {
-        "netclass": "POWER",
-        "pattern": "+BATT"
-      },
-      {
-        "netclass": "POWER",
-        "pattern": "12VIN"
-      }
-    ]
+    "netclass_patterns": []
   },
   "pcbnew": {
     "last_paths": {
@@ -567,7 +507,7 @@
       "MotorDriveUnit"
     ],
     [
-      "b85d5b0f-2c56-44b1-9c6e-08bd1fa15ae1",
+      "39b4203d-d853-4070-b119-46b13a9589cc",
       "MotorDriveUnit1"
     ]
   ],
