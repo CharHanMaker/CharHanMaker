@@ -12,40 +12,55 @@ class MainMode : public Mode, Robot {
     int i = 270;
     void init() {
         deviceBegin();
-        pid.setLimit(0, 65535); // 出力の最大値を設定
+        pid.setLimit(0, 12); // 出力の最大値を設定
         pid.setGain(Kp, Ki, Kd);
     }
     void before() {
     }
 
     void loop() {
+        // シリアルで速度を受信してそれをtagrgetにする
+
+        float angle1, angle2;
+        int time = 0;
         // time = Time.read_us();
-        // Time.reset(); //
-        float angle1, angle2, time;
-        angle1 = AbsEncorders.readDegree(0);     // 0番目のエンコーダの角度を取得
-        angle2 = AbsEncorders.readDegree(1);     // 1番目のエンコーダの角度を取得
-        float vel = AbsEncorders.getVelocity(0); // 1番目のエンコーダの角速度を取得[rad/s]
+        // Time.reset();                             //
+        angle1 = AbsEncorders.readDegree(0);      // 0番目のエンコーダの角度を取得
+        angle2 = AbsEncorders.readDegree(1);      // 1番目のエンコーダの角度を取得
+        float vel = -AbsEncorders.getVelocity(0); // 1番目のエンコーダの角速度を取得[rad/s]
 
         // Serial.printf("%.2f, %.2f, vel:%.2f, time:%dus\n", angle1, angle2, vel, time);
-        float error = 1.0 - vel; // 目標値と現在値の偏差を計算
-        pid.appendError(error);  // 偏差をPIDに追加
-        pid.compute();           // PIDの計算
-        float output = pid.getPID();
-        // 何かしら出力をする(analogWriteなど..)
-        analogWrite(CorePins::MotorA, output);
+        float error = target - vel; // 目標値と現在値の偏差を計算
+                                    // pid.appendError(error);  // 偏差をPIDに追加
+                                    // pid.compute();    p       // PIDの計算
 
-        Serial.printf("%.2f, %.2f, vel:%.2f, time:%dus\n", angle1, angle2, vel, output, time);
+        // pid
+        I += error * dt;
+        if (I > 12) I = 12;
+        if (I < -12) I = -12;
+        float output = error * Kp; //+ I * Ki;
+        float out__ = output * 5461.25;
+        // 何かしら出力をする(analogWriteなど..)
+        analogWrite(CorePins::MotorA, out__);
+
+        Serial.printf("targetVel:%.2f,vel:%.2f, out:%f,out__:%f,time:%dus\n", target, vel, output, I, time);
+        delay(5);
     }
 
     void after() {
+        I = 0;
+        analogWrite(CorePins::MotorA, 0);
     }
 
   private:
     PID pid;
     const float Kp = 1;
-    const float Ki = 1;
-    const float Kd = 0;
+    const float Ki = 0;
+    const float Kd = 0.001;
     const float dt = 0.005;
+    float target = 10;
+    timer Time;
+    float I;
 };
 
 extern MainMode mainMode;

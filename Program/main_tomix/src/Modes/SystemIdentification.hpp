@@ -14,7 +14,7 @@ class SystemIdentificationMode : public Mode, Robot {
     }
 
     void before() {
-        Serial.printf("before:%d\n", getModeLetter());
+        Serial.printf("before %s\n", getModeName());
     }
 
     void loop() {
@@ -54,7 +54,7 @@ class SystemIdentificationMode : public Mode, Robot {
     }
 
     void after() {
-        Serial.printf("after:%d\n", getModeLetter());
+        Serial.printf("after %s\n", getModeName());
     }
 
     void sysIdentification() {

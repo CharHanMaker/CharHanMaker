@@ -31,11 +31,11 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug",
-            "executable": "C:/Users/81909/Documents/ロボティクス学科/3回生_秋/ロボット創造実験/Code/CharHanMaker/Program/main_tomix/.pio/build/pico/firmware.elf",
+            "executable": "/Users/tomixrm/Desktop/ロボ創造/CharHanMaker/Program/main_tomix/.pio/build/pico/firmware.elf",
             "projectEnvName": "pico",
-            "toolchainBinDir": "C:/Users/81909/.platformio/packages/toolchain-rp2040-earlephilhower/bin",
+            "toolchainBinDir": "/Users/tomixrm/.platformio/packages/toolchain-rp2040-earlephilhower/bin",
             "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "C:/Users/81909/.platformio/platforms/raspberrypi@src-ff76a3915224135aafad379817f41edd/misc/svd/rp2040.svd",
+            "svdPath": "/Users/tomixrm/.platformio/platforms/raspberrypi/misc/svd/rp2040.svd",
             "preLaunchTask": {
                 "type": "PlatformIO",
                 "task": "Pre-Debug"
@@ -45,21 +45,21 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
-            "executable": "C:/Users/81909/Documents/ロボティクス学科/3回生_秋/ロボット創造実験/Code/CharHanMaker/Program/main_tomix/.pio/build/pico/firmware.elf",
+            "executable": "/Users/tomixrm/Desktop/ロボ創造/CharHanMaker/Program/main_tomix/.pio/build/pico/firmware.elf",
             "projectEnvName": "pico",
-            "toolchainBinDir": "C:/Users/81909/.platformio/packages/toolchain-rp2040-earlephilhower/bin",
+            "toolchainBinDir": "/Users/tomixrm/.platformio/packages/toolchain-rp2040-earlephilhower/bin",
             "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "C:/Users/81909/.platformio/platforms/raspberrypi@src-ff76a3915224135aafad379817f41edd/misc/svd/rp2040.svd"
+            "svdPath": "/Users/tomixrm/.platformio/platforms/raspberrypi/misc/svd/rp2040.svd"
         },
         {
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (without uploading)",
-            "executable": "C:/Users/81909/Documents/ロボティクス学科/3回生_秋/ロボット創造実験/Code/CharHanMaker/Program/main_tomix/.pio/build/pico/firmware.elf",
+            "executable": "/Users/tomixrm/Desktop/ロボ創造/CharHanMaker/Program/main_tomix/.pio/build/pico/firmware.elf",
             "projectEnvName": "pico",
-            "toolchainBinDir": "C:/Users/81909/.platformio/packages/toolchain-rp2040-earlephilhower/bin",
+            "toolchainBinDir": "/Users/tomixrm/.platformio/packages/toolchain-rp2040-earlephilhower/bin",
             "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "C:/Users/81909/.platformio/platforms/raspberrypi@src-ff76a3915224135aafad379817f41edd/misc/svd/rp2040.svd",
+            "svdPath": "/Users/tomixrm/.platformio/platforms/raspberrypi/misc/svd/rp2040.svd",
             "loadMode": "manual"
         }
     ]
