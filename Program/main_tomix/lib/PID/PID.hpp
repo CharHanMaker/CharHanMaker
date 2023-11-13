@@ -1,15 +1,15 @@
 #ifndef PID_H
 #define PID_H
 #include <Arduino.h>
-#include <TickTwo.h>
+#include <timer.h>
 
 class PID {
   private:
     /* data */
     float p, i, d; // PID gain
     float dt;      // interval of PID loop [s]
-    Ticker ticker;
-    Serial *pc;
+    // Ticker ticker;
+    // Serial *pc;
     float lastError;
     float error;
 
@@ -20,15 +20,16 @@ class PID {
     float pTerm;
     float iTerm, integral;
     float dTerm;
-
-    void compute();
+    timer t;
 
   public:
-    PID(float _p, float _i, float _d, float _dt, Serial *_pc);
+    PID(float _p, float _i, float _d, float _dt);
     void setLimit(float limit);
+    void setLimit(float _limitMin, float _limitMax);
     void setGain(float _p, float _i, float _d);
     void reset();
     void appendError(float _error);
+    void compute();
     float getPID();
 };
 
