@@ -41,6 +41,7 @@ class Pidtest : public Mode, Robot {
                 float u = Kp * e0 + Ki * integral_e + Kd * de;                   // 入力電圧
                 u *= -1;                                                         // -1倍ゲイン
 
+                // saturation 0 ~ 12[V]
                 if (u > 12)
                     u = 12;
                 else if (u < 0)
