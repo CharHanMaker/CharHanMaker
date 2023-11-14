@@ -32,6 +32,8 @@ class Robot {
         Wire.setClock(400000); // I2C の通信速度 : 400k Hz
         Wire.begin();
         AbsEncorders.begin();
+        AbsEncorders.setDirection(0, CCW);
+        AbsEncorders.setDirection(1, CCW);
 
         // ピンの設定
         pinMode(CorePins::EncPortA1, INPUT);

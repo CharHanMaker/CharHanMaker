@@ -10,6 +10,8 @@
 #define SQRT3 1.73205080757f
 #define SQRT2 1.41421356237f
 #define PI_3 1.0471975512f
+#define CW true
+#define CCW false
 
 #define abs(x) ((x) > 0 ? (x) : -(x))
 #define Range(a, x, b) ((a) <= (x) && (x) <= (b))

@@ -10,6 +10,10 @@ MultipleAS5600::MultipleAS5600(TwoWire &_i2c, uint8_t _muxAddress = MUX_ADDR, ui
 void MultipleAS5600::begin() {
     for (size_t i = 0; i < 8; i++) {
         velTimer[i].reset();
+        angleArray[i] = 0;
+        shAnglePrev[i] = 0;
+        shAngleZero[i] = 0;
+        isCW[i] = true;
     }
 }
 
@@ -36,18 +40,22 @@ float MultipleAS5600::readDegree(uint8_t _sensorNumber) {
         uint8_t angle_h = Wire.read();
         uint8_t angle_l = Wire.read();
         uint16_t rawAngle = (0x0F & angle_h) << 8 | angle_l;
-        angle_f = (float)rawAngle * 0.087890625; // 12bit -> 360.00deg
-        angleArray[_sensorNumber] = angle_f;
+        angle_f = (float)rawAngle * 0.087890625; // 12bit -> radian(0~2PI)
+        angleArray[_sensorNumber] = MyMath::gapDegrees(shAngleZero[_sensorNumber], angle_f) * (isCW[_sensorNumber] ? 1 : -1);
     } else {
         return 361; // error
     }
     return angle_f;
 }
 
-float MultipleAS5600::getVelocity(uint8_t _sensorNumber) {
+float MultipleAS5600::readRadian(uint8_t _sensorNumber) {
+    return readDegree(_sensorNumber) * DEG_TO_RAD;
+}
+
+float MultipleAS5600::getVelocity(uint8_t _sensorNumber) { // rad/s
     if (_sensorNumber > 7) _sensorNumber = 7;
-    if (angleArray[_sensorNumber] == 361) return 361;       // error
-    float shAngle = DEG_TO_RAD * angleArray[_sensorNumber]; // [rad]
+    if (angleArray[_sensorNumber] == 361) return 361; // error
+    float shAngle = angleArray[_sensorNumber];        // [rad]
     float dt = (float)velTimer[_sensorNumber].read_us() / 1000000;
     velTimer[_sensorNumber].reset();
     float angleDiff = shAnglePrev[_sensorNumber] - shAngle;
@@ -63,4 +71,14 @@ float MultipleAS5600::getVelocity(uint8_t _sensorNumber) {
     angularVelocity = velocityLPF[_sensorNumber].update(angularVelocity);
     shAnglePrev[_sensorNumber] = shAngle;
     return angularVelocity;
+}
+
+// CW　正回転 CCW 逆回転
+void MultipleAS5600::setDirection(uint8_t _sensorNumber, bool cw) {
+    isCW[_sensorNumber] = cw;
+}
+
+void MultipleAS5600::setZero(uint8_t _sensorNumber) {
+    if (_sensorNumber > 7) _sensorNumber = 7;
+    shAngleZero[_sensorNumber] = readDegree(_sensorNumber);
 }
