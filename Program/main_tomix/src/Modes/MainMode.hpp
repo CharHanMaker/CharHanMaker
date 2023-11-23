@@ -25,9 +25,9 @@ class MainMode : public Mode, Robot {
         int time = 0;
         // time = Time.read_us();
         // Time.reset();                             //
-        angle1 = AbsEncorders.readDegree(0);      // 0番目のエンコーダの角度を取得
-        angle2 = AbsEncorders.readDegree(1);      // 1番目のエンコーダの角度を取得
-        float vel = -AbsEncorders.getVelocity(0); // 1番目のエンコーダの角速度を取得[rad/s]
+        angle1 = AbsEncorders.readRadian(0);      // 0番目のエンコーダの弧度を取得
+        angle2 = AbsEncorders.readRadian(1);      // 1番目のエンコーダの弧度を取得
+        float vel = -AbsEncorders.getVelocity(0); // 0番目のエンコーダの角速度を取得[rad/s]
 
         // Serial.printf("%.2f, %.2f, vel:%.2f, time:%dus\n", angle1, angle2, vel, time);
         float error = target - vel; // 目標値と現在値の偏差を計算
@@ -43,7 +43,7 @@ class MainMode : public Mode, Robot {
         // 何かしら出力をする(analogWriteなど..)
         analogWrite(CorePins::MotorA, out__);
 
-        Serial.printf("targetVel:%.2f,vel:%.2f, out:%f,out__:%f,time:%dus\n", target, vel, output, I, time);
+        Serial.printf("targetVel:%.2f,rad:%.2f,vel:%.2f, out:%.2f,out__:%.2f,time:%dus\n", target, angle1, vel, output, I, time);
         delay(5);
     }
 

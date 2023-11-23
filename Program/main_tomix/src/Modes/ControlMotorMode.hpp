@@ -46,7 +46,9 @@ class ControlMotorMode : public Mode, Robot {
             acc1 = (vel1 - velPrev1) / Ts;
             acc2 = (vel2 - velPrev2) / Ts;
 
-            // モータに入力を与える
+            // ここに制御則とか書く
+
+            // input voltage to motor
             analogWrite(CorePins::MotorA, voltToDuty(12)); // ここ12の値を変更
             analogWrite(CorePins::MotorB, voltToDuty(12));
         }
@@ -66,11 +68,13 @@ class ControlMotorMode : public Mode, Robot {
     timer interval;
     const float Ts = 0.005; // 周期[s]
 
+    // エンコーダ系
     float angle1, angle2;
     float vel1, vel2;
     float acc1, acc2;
     float velPrev1, velPrev2;
 
+    // 制御系
     float volt1, volt2; // モータに入力する電圧
 
     uint16_t voltToDuty(float volt) {
