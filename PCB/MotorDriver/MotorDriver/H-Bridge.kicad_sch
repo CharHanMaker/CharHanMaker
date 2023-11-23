@@ -1047,7 +1047,7 @@
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Footprint" "TPH11006NL:TPH11006NL_SOP Advance_TOS-M" (at 139.7 50.8 0)
-      (effects (font (size 1.27 1.27)) hide)
+      (effects (font (size 1.27 1.27) bold) hide)
     )
     (property "Datasheet" "https://toshiba.semicon-storage.com/info/TPH11006NL_datasheet_en_20140225.pdf?did=14165&prodName=TPH11006NL" (at 134.62 66.04 0)
       (effects (font (size 1.27 1.27)) hide)

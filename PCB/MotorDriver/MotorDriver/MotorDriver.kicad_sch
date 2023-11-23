@@ -6108,7 +6108,7 @@
     (property "Value" "NMOS" (at 156.21 90.17 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "Package_TO_SOT_SMD:SOT-23" (at 154.94 86.36 0)
+    (property "Footprint" "TPH11006NL:TPH11006NL_SOP Advance_TOS-M" (at 154.94 86.36 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "https://akizukidenshi.com/download/ds/panjit/BSS138.pdf" (at 149.86 101.6 0)
