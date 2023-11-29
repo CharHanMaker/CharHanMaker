@@ -1,10 +1,13 @@
 #include "Motor.hpp"
 
-Motor::Motor(uint8_t _ph, uint8_t _en) : ph(_ph), en(_en), Speed(0) {}
+Motor::Motor(uint8_t _ph, uint8_t _en, MultipleAS5600 *_encoder, uint8_t _encoderPort)
+    : ph(_ph), en(_en),
+      encoder(_encoder),
+      encoderPort(_encoderPort) {}
 
 void Motor::begin() {
     analogWriteFreq(10000); // 10KHzがちょうど良さそう
-    analogWriteResolution(65535);
+    analogWriteResolution(pwmResolution);
 
     pinMode(ph, OUTPUT);
     pinMode(en, OUTPUT);
@@ -39,10 +42,30 @@ void Motor::stop() {
 }
 
 void Motor::brake() {
-    analogWrite(ph, 32767);
+    analogWrite(ph, pwmResolution / 2);
     digitalWrite(en, HIGH);
 }
 
 void Motor::drive(float radPerSec) {
-    // PIDする
+    //: TODO: PID制御
+    // @ryoskRFR 速度のPID制御を追加してもろて
+    encoder->readDegree(encoderPort);               // よしなにして，つかわなくてもいいよ
+    velAngular = encoder->getVelocity(encoderPort); // よしなにして，つかわなくてもいいよ
+    float error = radPerSec - velAngular;           // よしなにして，つかわなくてもいいよ
+    pid.appendError(error);                         // よしなにして，つかわなくてもいいよ
+    pid.compute();                                  // よしなにして，つかわなくてもいいよ
+    uint32_t out = pid.getPID();                    // よしなにして，つかわなくてもいいよ
+    runOpenloop(out);                               // よしなにして，つかわなくてもいいよ
+}
+
+void Motor::setPIDGain(float _p, float _i, float _d) {
+    pid.setGain(_p, _i, _d);
+}
+
+void Motor::setPIDLimit(float _limitMin, float _limitMax) {
+    pid.setLimit(_limitMin, _limitMax);
+}
+
+void Motor::resetPID() {
+    pid.reset();
 }

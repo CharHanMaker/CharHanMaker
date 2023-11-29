@@ -19,10 +19,11 @@ typedef struct {
 
 class Robot {
   public:
-    Robot(){}
+    Robot() {}
     timer Time;
     MultipleAS5600 AbsEncorders = MultipleAS5600(Wire, 0x70, 2);
-    Motor motorA = Motor(CorePins::MotorPHA, CorePins::MotorENA);
+    Motor motorA = Motor(CorePins::MotorPHA, CorePins::MotorENA, &AbsEncorders, 0);
+    Motor motorB = Motor(CorePins::MotorPHB, CorePins::MotorENB, &AbsEncorders, 1);
     sensors_t sensors;
 
     void deviceBegin() {
@@ -41,8 +42,8 @@ class Robot {
         pinMode(CorePins::Alive_LED, OUTPUT);
 
         // モーターのPWM周波数を設定
-        analogWriteFreq(10000);
-        analogWriteRange(65535);
+        // analogWriteFreq(10000);
+        // analogWriteRange(65535);
         motorA.setSaturation(65535, -65535);
         motorA.begin();
     }

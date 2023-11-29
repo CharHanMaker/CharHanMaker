@@ -18,8 +18,10 @@ class MainMode : public Mode, Robot {
     }
 
     void loop() {
+        // モータを回すプログラムです．
         int run = 65535 / 2 * MyMath::sinDeg(i);
-        motorA.runOpenloop(run, true);
+        motorA.runOpenloop(run, true); // これで無理やりモータを回せます．
+        // mototA.drive(velocity);// :TODO:@ryoskRFR ←←ここにPID制御の速度制御を入れたいよね
         delay(50);
         Serial.println(run);
         i++;
