@@ -16,16 +16,20 @@ class ControlMotorMode : public Mode, Robot {
     void before() {
         Serial.printf("before %s\n", getModeName());
 
-        startAngle1 = AbsEncorders.readRadian(0);
-        startAngle2 = AbsEncorders.readRadian(1);
-        currentAngle1 = 0;
-        currentAngle2 = 0;
-        round1 = false;
-        round2 = false;
-        roundCnt1 = 0;
-        roundCnt2 = 0;
-        velPrev1 = 0;
-        velPrev2 = 0;
+        for (size_t i = 0; i < 50; i++) {
+            angle[0] = AbsEncorders.readRadian(0); // 0番目のエンコーダの角度を取得
+            angle[1] = AbsEncorders.readRadian(1); // 1番目のエンコーダの角度を取得
+        }
+
+        for (uint8_t i = 0; i < 2; i++) {
+            startAngle[i] = angle[i];
+            currentAngle[i] = 0;
+            round[i] = false;
+            roundCnt[i] = 0;
+            velPrev[i] = 0;
+        }
+        highVel = HALF_PI; // rad/s
+        lowVel = HALF_PI / 2;
 
         // set PD gain
         angleKp[0] = 0;
@@ -37,10 +41,6 @@ class ControlMotorMode : public Mode, Robot {
         velKd[0] = 0;
         velKd[1] = 0;
 
-        for (size_t i = 0; i < 50; i++) {
-            angle1 = AbsEncorders.readRadian(0); // 0番目のエンコーダの角度を取得
-            angle2 = AbsEncorders.readRadian(1); // 1番目のエンコーダの角度を取得
-        }
         interval.reset();
     }
 
@@ -51,30 +51,33 @@ class ControlMotorMode : public Mode, Robot {
         analogWrite(CorePins::MotorA, 0);
         analogWrite(CorePins::MotorB, 0);
 
-        highVel = HALF_PI; // rad/s
-        lowVel = HALF_PI / 2;
-
         // 5ms ごとにセンサの値を読み，角速度を計算し，シリアルモニタに出力する
         // 5ms ごとにモータに入力を与える
         if (interval.read_us() >= Ts * 1000000) {
             interval.reset();
 
             // いろいろ更新
-            velPrev1 = vel1;
-            velPrev2 = vel2;
-            angle1 = AbsEncorders.readRadian(0); // 0番目のエンコーダの角度を取得
-            angle2 = AbsEncorders.readRadian(1); // 1番目のエンコーダの角度を取得
-            vel1 = -AbsEncorders.getVelocity(0); // 0番目のエンコーダの角速度を取得[rad/s]
-            vel2 = -AbsEncorders.getVelocity(1); // 1番目のエンコーダの角速度を取得[rad/s]
-            acc1 = (vel1 - velPrev1) / Ts;
-            acc2 = (vel2 - velPrev2) / Ts;
-
-            // ここに制御則とか書く
-            if (vel1 < lowVel || vel2 < lowVel) { // 目標の低角速度まで加速
-                analogWrite(CorePins::MotorA, voltToDuty(12));
-                analogWrite(CorePins::MotorB, voltToDuty(12));
-            } else { // 運転できるようになってからの制御
+            for (uint8_t i = 0; i < 2; i++) {
+                velPrev[i] = vel[i];
+                angle[i] = AbsEncorders.readRadian(i); // i番目のエンコーダの弧度を取得
+                vel[i] = -AbsEncorders.getVelocity(i); // i番目のエンコーダの角速度を取得[rad/s]
+                acc[i] = (vel[i] - velPrev[i]) / Ts;
             }
+
+            // モータが１周回転したことを確認
+            if (round[0])
+                round[0] = false;
+            else if (0 <= angle[0] && angle[0] < PI && PI < velPrev[0] && velPrev[0] < TWO_PI)
+                round[0] = true;
+
+            if (round[0])
+
+                // ここに制御則とか書く
+                if (vel[0] < lowVel || vel[1] < lowVel) { // 目標の低角速度まで加速
+                    analogWrite(CorePins::MotorA, voltToDuty(12));
+                    analogWrite(CorePins::MotorB, voltToDuty(12));
+                } else { // 運転できるようになってからの制御
+                }
 
             // input voltage to motor (0~12V)
             analogWrite(CorePins::MotorA, voltToDuty(12)); // ここ12の値を変更
@@ -97,20 +100,21 @@ class ControlMotorMode : public Mode, Robot {
     const float Ts = 0.005; // 周期[s]
 
     // エンコーダ系
-    float angle1, angle2;               // 0 ~ 2pi rad
-    float startAngle1, startAngle2;     // 0 ~ 2pi rad
-    float currentAngle1, currentAngle2; // 0 ~ float_max rad : 累積弧度
-    float vel1, vel2;                   // rad/s
-    float acc1, acc2;                   // rad/s/s
-    float velPrev1, velPrev2;
-    bool round1, round2;          // １周したことを判別
-    uint8_t roundCnt1, roundCnt2; // 何周したかをカウント
+    float angle[2];        // 0 ~ 2pi rad
+    float startAngle[2];   // 0 ~ 2pi rad
+    float currentAngle[2]; // 0 ~ float_max rad : 累積弧度
+    float vel[2];          // rad/s
+    float acc[2];          // rad/s/s
+    float velPrev[2];
+    bool round[2];       // １周したことを判別
+    uint8_t roundCnt[2]; // 何周したかをカウント
 
     // 制御系
     float highVel, lowVel;
-    float goalVel1, goalVel2;
-    float volt1, volt2; // モータに入力する電圧
+    float goalVel[2];
+    float volt[2]; // モータに入力する電圧
     float angleKp[2], angleKd[2], velKp[2], velKd[2];
+    float angleMaster, angleSlave;
 
     uint16_t voltToDuty(float volt) {
         return volt * 65535 / 12;
