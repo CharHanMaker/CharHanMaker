@@ -9,6 +9,7 @@
 #include <timer.h>
 #include "LPF.hpp"
 #include "MultipleAS5600.hpp"
+#include "Motor.hpp"
 
 typedef struct {
     uint16_t angleLeft;    //[deg]
@@ -34,14 +35,12 @@ class Robot {
         AbsEncorders.begin();
 
         // ピンの設定
-        pinMode(CorePins::EncPortA1, INPUT);
-        pinMode(CorePins::EncPortB1, INPUT);
-        pinMode(CorePins::EncPortA2, INPUT);
-        pinMode(CorePins::EncPortB2, INPUT);
+        pinMode(CorePins::MotorA1, OUTPUT);
+        pinMode(CorePins::MotorA2, OUTPUT);
+        pinMode(CorePins::MotorB1, OUTPUT);
+        pinMode(CorePins::MotorB2, OUTPUT);
         pinMode(CorePins::ENG_SW, INPUT);
         pinMode(CorePins::SW, INPUT);
-        pinMode(CorePins::MotorA, OUTPUT);
-        pinMode(CorePins::MotorB, OUTPUT);
         pinMode(CorePins::Debug_LED, OUTPUT);
         pinMode(CorePins::Alive_LED, OUTPUT);
 

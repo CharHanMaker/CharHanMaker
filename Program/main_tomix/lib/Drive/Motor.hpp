@@ -1,25 +1,24 @@
-#ifndef __Motor__
-#define __Motor__
+#ifndef __MOTOR__
+#define __MOTOR__
 
-#include "Motor.hpp"
-#include "core.hpp"
-#include "timer.h"
-#include "MyMath.hpp"
-
+#include "Arduino.h"
 class Motor {
   public:
-    Motor(uint8_t __pin);
+    Motor(uint8_t _ph, uint8_t _en);
     void begin();
-    void drive(int rpm);
-    void setGain(float _PGain, float _IGain, float _DGain);
-    void setLimit(float _limitUpper, float _limitLower);
-    void testSineWave();
+    void setSaturation(uint16_t _max, uint16_t _min);
+    void runOpenloop(uint16_t pwmDutyCount);
+    void brake();
+    void stop();
+    void drive(float radPerSec);
 
   private:
-    uint8_t pin;
-    float limitUpper, limitLower;
-    float P, I, D;
-    timer dt;
+    float Speed;
+    uint8_t ph;
+    uint8_t en;
+    uint16_t max;
+    uint16_t min;
+    uint16_t pwmDutyCount;
 };
 
 #endif

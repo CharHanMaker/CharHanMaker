@@ -19,25 +19,12 @@ class MainMode : public Mode, Robot {
     }
 
     void loop() {
-        // time = Time.read_us();
-        // Time.reset(); //
-        float angle1, angle2, time;
-        angle1 = AbsEncorders.readDegree(0);     // 0番目のエンコーダの角度を取得
-        angle2 = AbsEncorders.readDegree(1);     // 1番目のエンコーダの角度を取得
-        float vel = AbsEncorders.getVelocity(0); // 1番目のエンコーダの角速度を取得[rad/s]
 
-        // Serial.printf("%.2f, %.2f, vel:%.2f, time:%dus\n", angle1, angle2, vel, time);
-        float error = 1.0 - vel; // 目標値と現在値の偏差を計算
-        pid.appendError(error);  // 偏差をPIDに追加
-        pid.compute();           // PIDの計算
-        float output = pid.getPID();
-        // 何かしら出力をする(analogWriteなど..)
-        analogWrite(CorePins::MotorA, output);
-
-        Serial.printf("%.2f, %.2f, vel:%.2f, time:%dus\n", angle1, angle2, vel, output, time);
     }
 
     void after() {
+        analogWrite(CorePins::MotorA1, 0);
+        analogWrite(CorePins::MotorA2, 0);
     }
 
   private:
@@ -47,7 +34,5 @@ class MainMode : public Mode, Robot {
     const float Kd = 0;
     const float dt = 0.005;
 };
-
-extern MainMode mainMode;
 
 #endif

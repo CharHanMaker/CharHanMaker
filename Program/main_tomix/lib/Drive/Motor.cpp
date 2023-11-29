@@ -1,38 +1,39 @@
 #include "Motor.hpp"
 
-Motor::Motor(uint8_t __pin) {
-    pin = __pin;
-}
+Motor::Motor(uint8_t _ph, uint8_t _en) : ph(_ph), en(_en), Speed(0), pwmDutyCount(0) {}
 
 void Motor::begin() {
-    pinMode(pin, OUTPUT);
-    analogWriteFreq(25000); // 25kHz
-    analogWriteRange(65535);
-    encorder->begin();
-    dt.reset();
+    analogWriteResolution(65535);
+    analogWriteFreq(10000);
+    pinMode(ph, OUTPUT);
+    pinMode(en, OUTPUT);
 }
 
-void Motor::drive(int rpm) {
-    // モータを回す関数
-    // rpm: 回転数
+void Motor::setSaturation(uint16_t _max, uint16_t _min) {
+    max = _max;
+    min = _min;
 }
 
-void Motor::setGain(float _PGain, float _IGain, float _DGain) {
-    P = _PGain;
-    I = _IGain;
-    D = _DGain;
+void Motor::runOpenloop(uint16_t pwmDutyCount) {
+    constrain(pwmDutyCount, 0, 65535);
+    if (pwmDutyCount > 0) {
+        digitalWrite(en, HIGH);
+    } else {
+        digitalWrite(en, LOW);
+    }
+    analogWrite(ph, abs(pwmDutyCount));
 }
 
-void Motor::setLimit(float _limitUpper, float _limitLower) {
-    limitUpper = _limitUpper;
-    limitLower = _limitLower;
+void Motor::brake() {
+    analogWrite(ph, 65535);
+    digitalWrite(en, HIGH);
 }
 
-void Motor::testSineWave() {
-    i++;
-    int power = 65535 / 2 * MyMath::sinDeg(i) + 65535 / 2;
-    analogWrite(16, power);
-    analogWrite(25, power);
-    delay(10);
-    Serial.printf("i:%d\n", power);
+void Motor::stop() {
+    digitalWrite(ph, LOW);
+    digitalWrite(en, LOW);
+}
+
+void Motor::drive(float radPerSec) {
+    // PIDする
 }
