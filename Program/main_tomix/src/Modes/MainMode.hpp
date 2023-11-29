@@ -9,7 +9,6 @@ class MainMode : public Mode, Robot {
 
   public:
     MainMode(char letter, const char name[]) : Mode(letter, name), pid(Kp, Ki, Kd, dt) {}
-    int i = 270;
     void init() {
         deviceBegin();
         pid.setLimit(0, 65535); // 出力の最大値を設定
@@ -19,7 +18,11 @@ class MainMode : public Mode, Robot {
     }
 
     void loop() {
-
+        int run = 65535 / 2 * MyMath::sinDeg(i) + 65535 / 2;
+        motorA.runOpenloop(run);
+        delay(50);
+        i++;
+        Serial.printf("%d\n", run);
     }
 
     void after() {
@@ -33,6 +36,7 @@ class MainMode : public Mode, Robot {
     const float Ki = 1;
     const float Kd = 0;
     const float dt = 0.005;
+    int i = 0;
 };
 
 #endif

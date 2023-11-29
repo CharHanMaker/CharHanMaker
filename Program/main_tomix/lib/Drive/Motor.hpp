@@ -6,7 +6,7 @@ class Motor {
   public:
     Motor(uint8_t _ph, uint8_t _en);
     void begin();
-    void setSaturation(uint16_t _max, uint16_t _min);
+    void setSaturation(int32_t _max, int32_t _min);
     void runOpenloop(uint16_t pwmDutyCount);
     void brake();
     void stop();

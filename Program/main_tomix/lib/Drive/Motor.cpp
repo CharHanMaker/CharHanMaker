@@ -3,25 +3,30 @@
 Motor::Motor(uint8_t _ph, uint8_t _en) : ph(_ph), en(_en), Speed(0), pwmDutyCount(0) {}
 
 void Motor::begin() {
+    analogWriteFreq(10000); // 10KHzがちょうど良さそう
     analogWriteResolution(65535);
-    analogWriteFreq(10000);
+
     pinMode(ph, OUTPUT);
     pinMode(en, OUTPUT);
 }
 
-void Motor::setSaturation(uint16_t _max, uint16_t _min) {
+void Motor::setSaturation(int32_t _max, int32_t _min) {
     max = _max;
     min = _min;
 }
 
 void Motor::runOpenloop(uint16_t pwmDutyCount) {
-    constrain(pwmDutyCount, 0, 65535);
-    if (pwmDutyCount > 0) {
-        digitalWrite(en, HIGH);
-    } else {
-        digitalWrite(en, LOW);
+    if (pwmDutyCount > max) {
+        pwmDutyCount = max;
+    } else if (pwmDutyCount < min) {
+        pwmDutyCount = min;
     }
-    analogWrite(ph, abs(pwmDutyCount));
+    if (pwmDutyCount > 0) {
+        digitalWrite(ph, HIGH);
+    } else {
+        digitalWrite(ph, LOW);
+    }
+    analogWrite(en, abs(pwmDutyCount));
 }
 
 void Motor::brake() {
