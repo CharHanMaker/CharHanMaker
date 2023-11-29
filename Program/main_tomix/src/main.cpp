@@ -1,21 +1,18 @@
 #include <Robot.hpp>
 #include <./Modes/MainMode.hpp>
 #include <./Modes/ModeTemp.hpp>
-#include <./Modes/SystemIdentification.hpp>
 
-#define MODE_QTY 3
+#define MODE_QTY 2
 
 MainMode mainMode('M', "MainMode");
 TempMode tempMode('T', "TempMode");
-SystemIdentificationMode systemidentificationMode('S', "SI Mode");
 
-Mode *modes[MODE_QTY] = {&mainMode, &tempMode, &systemidentificationMode};
+Mode *modes[MODE_QTY] = {&mainMode, &tempMode};
 Mode *currentMode = &tempMode;
 
 void setup() {
     mainMode.init();
     tempMode.init();
-    systemidentificationMode.init();
 }
 
 void loop() {
