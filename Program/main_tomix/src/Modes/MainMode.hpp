@@ -18,16 +18,15 @@ class MainMode : public Mode, Robot {
     }
 
     void loop() {
-        int run = 65535 / 2 * MyMath::sinDeg(i) + 65535 / 2;
-        motorA.runOpenloop(run);
+        int run = 65535 / 2 * MyMath::sinDeg(i);
+        motorA.runOpenloop(run, true);
         delay(50);
+        Serial.println(run);
         i++;
-        Serial.printf("%d\n", run);
     }
 
     void after() {
-        analogWrite(CorePins::MotorA1, 0);
-        analogWrite(CorePins::MotorA2, 0);
+        motorA.stop();
     }
 
   private:

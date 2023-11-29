@@ -7,18 +7,17 @@ class Motor {
     Motor(uint8_t _ph, uint8_t _en);
     void begin();
     void setSaturation(int32_t _max, int32_t _min);
-    void runOpenloop(uint16_t pwmDutyCount);
-    void brake();
+    void runOpenloop(int32_t pwmDutyCount, bool brakeOnZero);
     void stop();
+    void brake();
     void drive(float radPerSec);
 
   private:
     float Speed;
     uint8_t ph;
     uint8_t en;
-    uint16_t max;
-    uint16_t min;
-    uint16_t pwmDutyCount;
+    int32_t max;
+    int32_t min;
 };
 
 #endif

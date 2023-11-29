@@ -27,10 +27,10 @@ const uint8_t Servo2 = 19;
 const uint8_t Servo3 = 20;
 
 // PWM(Motor)
-const uint8_t MotorA1 = 7;
-const uint8_t MotorB1 = 9;
-const uint8_t MotorA2 = 6;
-const uint8_t MotorB2 = 8;
+const uint8_t MotorPHA = 7;
+const uint8_t MotorPHB = 9;
+const uint8_t MotorENA = 6;
+const uint8_t MotorENB = 8;
 
 // ADC
 const uint8_t ADC_0 = 26;

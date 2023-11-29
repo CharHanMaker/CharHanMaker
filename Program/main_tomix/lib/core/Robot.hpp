@@ -19,11 +19,10 @@ typedef struct {
 
 class Robot {
   public:
-    Robot() : AbsEncorders(Wire, 0x70, 2),
-              motorA(CorePins::MotorA2, CorePins::MotorA1) {}
+    Robot(){}
     timer Time;
-    MultipleAS5600 AbsEncorders;
-    Motor motorA;
+    MultipleAS5600 AbsEncorders = MultipleAS5600(Wire, 0x70, 2);
+    Motor motorA = Motor(CorePins::MotorPHA, CorePins::MotorENA);
     sensors_t sensors;
 
     void deviceBegin() {
@@ -36,7 +35,6 @@ class Robot {
         AbsEncorders.begin();
 
         // ピンの設定
-
         pinMode(CorePins::ENG_SW, INPUT);
         pinMode(CorePins::SW, INPUT);
         pinMode(CorePins::Debug_LED, OUTPUT);

@@ -1,6 +1,6 @@
 #include "Motor.hpp"
 
-Motor::Motor(uint8_t _ph, uint8_t _en) : ph(_ph), en(_en), Speed(0), pwmDutyCount(0) {}
+Motor::Motor(uint8_t _ph, uint8_t _en) : ph(_ph), en(_en), Speed(0) {}
 
 void Motor::begin() {
     analogWriteFreq(10000); // 10KHzがちょうど良さそう
@@ -15,7 +15,11 @@ void Motor::setSaturation(int32_t _max, int32_t _min) {
     min = _min;
 }
 
-void Motor::runOpenloop(uint16_t pwmDutyCount) {
+void Motor::runOpenloop(int32_t pwmDutyCount, bool brakeOnZero = false) {
+    if (brakeOnZero && pwmDutyCount == 0) {
+        brake();
+        return;
+    }
     if (pwmDutyCount > max) {
         pwmDutyCount = max;
     } else if (pwmDutyCount < min) {
@@ -29,14 +33,14 @@ void Motor::runOpenloop(uint16_t pwmDutyCount) {
     analogWrite(en, abs(pwmDutyCount));
 }
 
-void Motor::brake() {
-    analogWrite(ph, 65535);
-    digitalWrite(en, HIGH);
-}
-
 void Motor::stop() {
     digitalWrite(ph, LOW);
     digitalWrite(en, LOW);
+}
+
+void Motor::brake() {
+    analogWrite(ph, 32767);
+    digitalWrite(en, HIGH);
 }
 
 void Motor::drive(float radPerSec) {
