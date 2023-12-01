@@ -11,7 +11,7 @@ class MainMode : public Mode, Robot {
     MainMode(char letter, const char name[]) : Mode(letter, name), pid(Kp, Ki, Kd, dt) {}
     void init() {
         deviceBegin();
-        pid.setLimit(0, 65535); // 出力の最大値を設定
+        pid.setLimit(0, 12); // 出力の最大値を設定
         pid.setGain(Kp, Ki, Kd);
     }
     void before() {
@@ -36,8 +36,8 @@ class MainMode : public Mode, Robot {
   private:
     PID pid;
     const float Kp = 1;
-    const float Ki = 1;
-    const float Kd = 0;
+    const float Ki = 0;
+    const float Kd = 0.001;
     const float dt = 0.005;
     int i = 0;
 };
