@@ -10,14 +10,14 @@ MultipleAS5600::MultipleAS5600(TwoWire &_i2c, uint8_t _muxAddress = MUX_ADDR, ui
 void MultipleAS5600::begin() {
     for (size_t i = 0; i < 8; i++) {
         velTimer[i].reset();
-        angleArray[i] = 0;
-        shAnglePrev[i] = 0;
-        shAngleZero[i] = 0;
+        shaftAngleArray[i] = 0;
+        shaftAnglePrev[i] = 0;
+        shaftAngleZero[i] = 0;
         isCW[i] = true;
     }
 }
 
-float MultipleAS5600::readDegree(uint8_t _sensorNumber) {
+float MultipleAS5600::readDegree(uint8_t _sensorNumber) { // returns [deg]
     // program Mux to read from correct port(0-7)
     if (_sensorNumber > 7) _sensorNumber = 7;
 
@@ -40,38 +40,40 @@ float MultipleAS5600::readDegree(uint8_t _sensorNumber) {
         uint8_t angle_h = Wire.read();
         uint8_t angle_l = Wire.read();
         uint16_t rawAngle = (0x0F & angle_h) << 8 | angle_l;
-        angle_f = (float)rawAngle * 0.087890625; // 12bit -> radian(0~2PI)
-        angleArray[_sensorNumber] = MyMath::gapDegrees(shAngleZero[_sensorNumber], angle_f) * (isCW[_sensorNumber] ? 1 : -1);
+        angle_f = (float)rawAngle * 0.087890625; // 12bit -> DEGREE(0~360)
+        shaftAnglePrev[_sensorNumber] = shaftAngleArray[_sensorNumber]; // [DEG]
+        shaftAngleArray[_sensorNumber] = MyMath::gapDegrees(shaftAngleZero[_sensorNumber], angle_f) * (isCW[_sensorNumber] ? 1 : -1);
     } else {
         return 361; // error
     }
     return angle_f;
 }
 
-float MultipleAS5600::readRadian(uint8_t _sensorNumber) {
+float MultipleAS5600::readRadian(uint8_t _sensorNumber) { // returns [rad]
     return readDegree(_sensorNumber) * DEG_TO_RAD;
 }
 
-float MultipleAS5600::getVelocity(uint8_t _sensorNumber) { // rad/s
+float MultipleAS5600::getVelocity(uint8_t _sensorNumber) { // returns [rad/s]
     if (_sensorNumber > 7) _sensorNumber = 7;
-    if (angleArray[_sensorNumber] == 361) return 361; // error
-    float shAngle = angleArray[_sensorNumber];        // [rad]
+    if (shaftAngleArray[_sensorNumber] == 361) return 361; // error
+    float shaftAngle = shaftAngleArray[_sensorNumber];        // [deg]
     float dt = (float)velTimer[_sensorNumber].read_us() / 1000000;
     velTimer[_sensorNumber].reset();
-    float angleDiff = shAnglePrev[_sensorNumber] - shAngle;
+    float angleDiff = (shaftAnglePrev[_sensorNumber] - shaftAngle) * DEG_TO_RAD;// angleDiff[rad]
     if (angleDiff > PI) {
         angleDiff -= 2 * PI;
     } else if (angleDiff < -PI) {
         angleDiff += 2 * PI;
     }
-    float angularVelocity = angleDiff / dt;
+    float angularVelocity = angleDiff / dt; // [rad/s]
     if (abs(angleDiff) > PI && angularVelocity != 0) {
         angularVelocity += (angularVelocity > 0) ? -2 * PI / dt : 2 * PI / dt;
     }
-    angularVelocity = velocityLPF[_sensorNumber].update(angularVelocity);
-    shAnglePrev[_sensorNumber] = shAngle;
+    angularVelocity = velocityLPF[_sensorNumber].update(angularVelocity); // [rad/s]
     return angularVelocity;
 }
+
+
 
 // CW　正回転 CCW 逆回転
 void MultipleAS5600::setDirection(uint8_t _sensorNumber, bool cw) {
@@ -80,5 +82,5 @@ void MultipleAS5600::setDirection(uint8_t _sensorNumber, bool cw) {
 
 void MultipleAS5600::setZero(uint8_t _sensorNumber) {
     if (_sensorNumber > 7) _sensorNumber = 7;
-    shAngleZero[_sensorNumber] = readDegree(_sensorNumber);
+    shaftAngleZero[_sensorNumber] = readDegree(_sensorNumber);
 }

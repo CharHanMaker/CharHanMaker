@@ -18,19 +18,19 @@ class MultipleAS5600 {
     void begin();
     float readDegree(uint8_t _sensorNumber); // degree
     float readRadian(uint8_t _sensorNumber); // radian
-    void readDegreeAll(uint16_t *_angleArray);
+    void readDegreeAll(uint16_t *_shaftAngleArray);
     float getVelocity(uint8_t _sensorNumber); // rad/s
-    void setDirection(uint8_t _sensorNumber, bool cw);
-    void setZero(uint8_t _sensorNumber);
-
+    float getContinuousRadians(uint8_t _sensorNumber); // 連続した角度を返す
+    void setDirection(uint8_t _sensorNumber, bool cw); //エンコーダの返す方向の符号を設定
+    void setZero(uint8_t _sensorNumber); // 角度の初期位置をセット
   private:
     uint8_t muxAddress;
     uint8_t sensorQty;
     uint8_t sensorNumber;
     uint8_t prevPort;
-    float angleArray[8];
-    float shAnglePrev[8];
-    float shAngleZero[8];
+    float shaftAngleArray[8];// [DEG]
+    float shaftAnglePrev[8]; // [DEG]
+    float shaftAngleZero[8]; //  [DEG]
     bool isCW[8];
     TwoWire *i2c;
     timer velTimer[8];
