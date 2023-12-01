@@ -20,7 +20,8 @@ class MultipleAS5600 {
     float readRadian(uint8_t _sensorNumber); // radian
     void readDegreeAll(uint16_t *_shaftAngleArray);
     float getVelocity(uint8_t _sensorNumber); // rad/s
-    float getContinuousRadians(uint8_t _sensorNumber); // 連続した角度を返す
+    float getContinuousDegree(uint8_t _sensorNumber); // 連続した角度を返す．はず[deg]
+    float getContinuousRadian(uint8_t _sensorNumber); // 連続した角度を返す．はず[rad]
     void setDirection(uint8_t _sensorNumber, bool cw); //エンコーダの返す方向の符号を設定
     void setZero(uint8_t _sensorNumber); // 角度の初期位置をセット
   private:

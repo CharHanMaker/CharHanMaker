@@ -73,6 +73,32 @@ float MultipleAS5600::getVelocity(uint8_t _sensorNumber) { // returns [rad/s]
     return angularVelocity;
 }
 
+void MultipleAS5600::readDegreeAll(uint16_t *_shaftAngleArray) {
+    for (size_t i = 0; i < sensorQty; i++) {
+        _shaftAngleArray[i] = readDegree(i);
+    }
+}
+
+// :TODO: @ryoskRFR チェックプリーズ
+float MultipleAS5600::getContinuousDegree(uint8_t _sensorNumber) {
+    if (_sensorNumber > 7) _sensorNumber = 7;
+    if (shaftAngleArray[_sensorNumber] == 361) return 361; // error
+    float shaftAngle = shaftAngleArray[_sensorNumber];        // [deg]
+    float angleDiff = (shaftAnglePrev[_sensorNumber] - shaftAngle); // [deg]
+    if (angleDiff > 180) {
+        angleDiff -= 360;
+    } else if (angleDiff < -180) {
+        angleDiff += 360;
+    }
+    float continuousAngle = shaftAngle + angleDiff; // [deg]
+
+    return continuousAngle;
+}
+
+// :TODO: @ryoskRFR チェックプリーズ
+float MultipleAS5600::getContinuousRadian(uint8_t _sensorNumber) {
+    return getContinuousDegree(_sensorNumber) * DEG_TO_RAD;
+}
 
 
 // CW　正回転 CCW 逆回転

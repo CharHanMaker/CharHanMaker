@@ -19,36 +19,30 @@ class MainMode : public Mode, Robot {
     }
 
     void loop() {
-        // シリアルで速度を受信してそれをtagrgetにする
+        //:TODO: @ryoskRFR チェックプリーズ
+        // コメントアウトしながらチェックしたい(特にgetContinuousDegreeとgetContinuousRadian)
+        // radianとdegreeの違いも．
+        //　角度
+        float degree0 = AbsEncorders.readDegree(0); // 0~360
+        float degree1 = AbsEncorders.readDegree(1);
+        float radian0 = AbsEncorders.readDegree(0); // 0~2π
+        float radian1 = AbsEncorders.readDegree(1);
+        Serial.printf("DEGREE: %f, %f, %f, %f \n", degree0, degree1, radian0, radian1);
 
-        float angle1, angle2;
-        int time = 0;
-        // time = Time.read_us();
-        // Time.reset();                             //
+        // 角速度
+        float radPerSec0 = AbsEncorders.getVelocity(0);
+        float radPerSec1 = AbsEncorders.getVelocity(0);
+        Serial.printf("RAD/S: %f, %f \n", radPerSec0, radPerSec1);
 
-        float angle = AbsEncorders.readRadian(1);
+        // 連続した角度
+        float continuouseDegree0 = AbsEncorders.getContinuousDegree(0);
+        float continuouseDegree1 = AbsEncorders.getContinuousDegree(1);
+        float continuouseRadian0 = AbsEncorders.getContinuousRadian(0);
+        float continuouseRadian1 = AbsEncorders.getContinuousRadian(1);
+        Serial.printf("CONTINUE:%f, %f, %f, %f \n", continuouseDegree0, continuouseDegree1, continuouseRadian0, continuouseRadian1);
 
-        angle1 = AbsEncorders.readRadian(0);      // 0番目のエンコーダの弧度を取得
-        angle2 = AbsEncorders.readRadian(1);      // 1番目のエンコーダの弧度を取得
-        float vel = -AbsEncorders.getVelocity(1); // 0番目のエンコーダの角速度を取得[rad/s]
-
-
-        // Serial.printf("%.2f, %.2f, vel:%.2f, time:%dus\n", angle1, angle2, vel, time);
-        float error = target - vel; // 目標値と現在値の偏差を計算
-                                    // pid.appendError(error);  // 偏差をPIDに追加
-                                    // pid.compute();    p       // PIDの計算
-
-        // pid
-        I += error * dt;
-        if (I > 12) I = 12;
-        if (I < -12) I = -12;
-        float output = error * Kp; //+ I * Ki;
-        float out__ = output * 5461.25;
-        // 何かしら出力をする(analogWriteなど..)
-        analogWrite(CorePins::MotorA, out__);
-
-        Serial.printf("targetVel:%.2f,rad:%.2f,vel:%.2f, out:%.2f,out__:%.2f,time:%dus\n", target, angle, vel, output, I, time);
-        delay(5);
+        
+        delay(10);
     }
 
     void after() {
