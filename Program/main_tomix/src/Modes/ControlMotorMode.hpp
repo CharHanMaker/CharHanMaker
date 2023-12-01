@@ -24,7 +24,6 @@ class ControlMotorMode : public Mode, Robot {
         for (uint8_t i = 0; i < 2; i++) {
             startAngle[i] = angle[i];
             currentAngle[i] = 0;
-            round[i] = false;
             roundCnt[i] = 0;
             velPrev[i] = 0;
         }
@@ -62,24 +61,23 @@ class ControlMotorMode : public Mode, Robot {
                 angle[i] = AbsEncorders.readRadian(i); // i番目のエンコーダの弧度を取得
                 vel[i] = -AbsEncorders.getVelocity(i); // i番目のエンコーダの角速度を取得[rad/s]
                 acc[i] = (vel[i] - velPrev[i]) / Ts;
+
+                // モータが１周回転したことを確認
+                if (0 <= angle[i] && angle[i] < PI && PI < velPrev[i] && velPrev[i] < TWO_PI)
+                    roundCnt[i]++;
+
+                currentAngle[i] = (float)roundCnt[i] * TWO_PI + angle[i] - startAngle[i];
             }
 
-            // モータが１周回転したことを確認
-            if (round[0])
-                round[0] = false;
-            else if (0 <= angle[0] && angle[0] < PI && PI < velPrev[0] && velPrev[0] < TWO_PI)
-                round[0] = true;
-
-            if (round[0])
-
-                // ここに制御則とか書く
-                if (vel[0] < lowVel || vel[1] < lowVel) { // 目標の低角速度まで加速
-                    analogWrite(CorePins::MotorA, voltToDuty(12));
-                    analogWrite(CorePins::MotorB, voltToDuty(12));
-                } else { // 運転できるようになってからの制御
-                }
+            // ここに制御則とか書く
+            if (vel[0] < lowVel || vel[1] < lowVel) { // 目標の低角速度まで加速
+                analogWrite(CorePins::MotorA, voltToDuty(12));
+                analogWrite(CorePins::MotorB, voltToDuty(12));
+            } else { // 運転できるようになってからの制御
+            }
 
             // input voltage to motor (0~12V)
+            // 入力電圧のsaturationを書く
             analogWrite(CorePins::MotorA, voltToDuty(12)); // ここ12の値を変更
             analogWrite(CorePins::MotorB, voltToDuty(12));
         }
@@ -106,11 +104,11 @@ class ControlMotorMode : public Mode, Robot {
     float vel[2];          // rad/s
     float acc[2];          // rad/s/s
     float velPrev[2];
-    bool round[2];       // １周したことを判別
     uint8_t roundCnt[2]; // 何周したかをカウント
 
     // 制御系
     float highVel, lowVel;
+    float goalAngle[2];
     float goalVel[2];
     float volt[2]; // モータに入力する電圧
     float angleKp[2], angleKd[2], velKp[2], velKd[2];
