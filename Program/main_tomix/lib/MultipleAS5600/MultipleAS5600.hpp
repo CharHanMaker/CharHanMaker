@@ -29,10 +29,11 @@ class MultipleAS5600 {
     uint8_t sensorQty;
     uint8_t sensorNumber;
     uint8_t prevPort;
-    float shaftAngleArray[8];// [DEG]
-    float shaftAnglePrev[8]; // [DEG]
-    float shaftAngleZero[8]; //  [DEG]
-    bool isCW[8];
+    float shaftAngleArray[8] = {0};// [DEG]
+    float shaftAnglePrev[8] = {0}; // [DEG]
+    float shaftAngleZero[8] = {0}; //  [DEG]
+    float continuousAngle[8] = {0}; // [DEG]
+    bool isCW[8] = {true};
     TwoWire *i2c;
     timer velTimer[8];
     LPF velocityLPF[8] = {LPF_COEFF, LPF_COEFF, LPF_COEFF, LPF_COEFF, LPF_COEFF, LPF_COEFF, LPF_COEFF, LPF_COEFF};

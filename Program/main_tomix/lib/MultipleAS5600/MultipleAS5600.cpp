@@ -84,15 +84,16 @@ float MultipleAS5600::getContinuousDegree(uint8_t _sensorNumber) {
     if (_sensorNumber > 7) _sensorNumber = 7;
     if (shaftAngleArray[_sensorNumber] == 361) return 361; // error
     float shaftAngle = shaftAngleArray[_sensorNumber];        // [deg]
-    float angleDiff = (shaftAnglePrev[_sensorNumber] - shaftAngle); // [deg]
-    if (angleDiff > 180) {
-        angleDiff -= 360;
-    } else if (angleDiff < -180) {
-        angleDiff += 360;
-    }
-    float continuousAngle = shaftAngle + angleDiff; // [deg]
+    float angleDiff = shaftAnglePrev[_sensorNumber] - shaftAngle; // [deg]
 
-    return continuousAngle;
+    if (angleDiff > 180) {
+        angleDiff = 360 - angleDiff;
+    } else if (angleDiff < -180) {
+        angleDiff = 360 + angleDiff;
+    }
+    continuousAngle[_sensorNumber] = continuousAngle[_sensorNumber] + angleDiff; // [deg
+
+    return continuousAngle[_sensorNumber];
 }
 
 // :TODO: @ryoskRFR チェックプリーズ
