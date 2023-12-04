@@ -15,14 +15,27 @@ class MainMode : public Mode, Robot {
         pid.setGain(Kp, Ki, Kd);
     }
     void before() {
+		float zeroPos[2] = {0};
+		for (size_t i = 0; i < 30; i++){
+			zeroPos[0] =  AbsEncorders.setZero(0);
+			zeroPos[1] =  AbsEncorders.setZero(1);
+		}  
+		Serial.printf("zeroPos[0]: %.02f, zeroPos[1]: %.02f\n", zeroPos[0], zeroPos[1]);
+		delay(1000);
     }
 
     void loop() {
-        float angle0 = AbsEncorders.readDegree(0);
-        float angle1 = AbsEncorders.readDegree(1);
-        float vel0 = AbsEncorders.getVelocity(0);
-        float vel1 = AbsEncorders.getVelocity(0);
-        Serial.printf("%f, %f, %f, %f\n", angle0, angle1, vel0, vel1);
+        // float angle0 = AbsEncorders.readDegree(0);
+        // float angle1 = AbsEncorders.readDegree(1);
+        uint16_t raw0 = AbsEncorders.readRawValue(0);
+        Serial.printf("raw0: %d, count:%d\n", raw0, AbsEncorders.count[0]);
+        // float vel0 = AbsEncorders.getVelocity(0);
+        // float vel1 = AbsEncorders.getVelocity(1);
+        // float continuousAngle0 = AbsEncorders.getContinuousDegree(0);
+        // float continuousAngle1 = AbsEncorders.getContinuousDegree(1);
+        // continuousAngle0 += abs(int(continuousAngle0 / 360));
+        // continuousAngle1 += abs(int(continuousAngle1 / 360));
+        // Serial.printf("%.02f, %.02f, %d, %d\n", angle0, angle1, AbsEncorders.count[0], AbsEncorders.count[1]);
 
         // // モータを回すプログラムです．
         // int run = 65535 / 2 * MyMath::sinDeg(i);

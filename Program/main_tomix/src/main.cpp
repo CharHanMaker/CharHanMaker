@@ -17,7 +17,6 @@ void setup() {
 
 void loop() {
     if (Serial.available() > 0) {
-        // char c = Serial.read();
         char c = Serial.read();
 
         for (unsigned i = 0; i < MODE_QTY; ++i) {

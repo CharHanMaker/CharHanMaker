@@ -217,7 +217,7 @@ int MyMath::gapDegrees180(int deg1, int deg2) {
 
 int MyMath::gapDegrees(int deg1, int deg2) {
     int a = normalizeDegrees(deg1) - normalizeDegrees(deg2);
-    if (a < 0)
+    while (a < 0)
         a += 360;
     return a;
 }
