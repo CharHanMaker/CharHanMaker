@@ -14,12 +14,13 @@ void MultipleAS5600::begin() {
         valuePrev[i] = 0;
         valueZero[i] = 0;
         isCW[i] = true;
+        setZero(i);
     }
 }
 
-float MultipleAS5600::readRawValue(uint8_t _sensorNumber){
+float MultipleAS5600::readRawValue(uint8_t _sensorNumber) {
     // program Mux to read from correct port(0-7)
-    if (_sensorNumber > 7) _sensorNumber = 7;
+    if (_sensorNumber > 7) return VALUE_ERROR;
 
     // 前回と同じポートだったらMUXにアドレス更新をしない
     if (prevPort != _sensorNumber) {
@@ -38,14 +39,10 @@ float MultipleAS5600::readRawValue(uint8_t _sensorNumber){
     uint16_t rawValue = 0;
     if (Wire.available()) {
         uint8_t highByte = Wire.read();
-        uint8_t lowByte  = Wire.read();
-        rawValue  = (0x0F & highByte) << 8 | lowByte;
-        // 回転数カウント
-        if(rawValue - valuePrev[_sensorNumber] > 2048) count[_sensorNumber]--;
-        else if(rawValue - valuePrev[_sensorNumber] < -2048) count[_sensorNumber]++;
-        valuePrev[_sensorNumber] = rawValue;
+        uint8_t lowByte = Wire.read();
+        rawValue = (0x0F & highByte) << 8 | lowByte;
     } else {
-        return 4097; // error
+        return VALUE_ERROR; // error
     }
     return rawValue;
 }
@@ -54,6 +51,13 @@ uint16_t MultipleAS5600::read12BitValue(uint8_t _sensorNumber) {
     if (_sensorNumber > 7) _sensorNumber = 7;
     uint16_t value = valueZero[_sensorNumber] - readRawValue(_sensorNumber);
     if (value < 0) value += 4096;
+
+    // 回転数カウント
+    if (value - valuePrev[_sensorNumber] > 2048)
+        count[_sensorNumber]--;
+    else if (value - valuePrev[_sensorNumber] < -2048)
+        count[_sensorNumber]++;
+    valuePrev[_sensorNumber] = value;
     return value;
 }
 
@@ -67,11 +71,11 @@ float MultipleAS5600::readRadian(uint8_t _sensorNumber) { // returns [rad]
 
 float MultipleAS5600::getVelocity(uint8_t _sensorNumber) { // returns [rad/s]
     if (_sensorNumber > 7) _sensorNumber = 7;
-    if (valueArray[_sensorNumber] == 4097) return 4097; // error
-    float value = valueArray[_sensorNumber];        // [deg]
+    if (valueArray[_sensorNumber] == VALUE_ERROR) return VALUE_ERROR; // error
+    float value = valueArray[_sensorNumber];
     float dt = (float)velTimer[_sensorNumber].read_us() / 1000000;
     velTimer[_sensorNumber].reset();
-    float radDiff = (valuePrev[_sensorNumber] - value) * BIT_12_TO_RADIAN;// angleDiff[rad]
+    float radDiff = (valuePrev[_sensorNumber] - value) * BIT_12_TO_RADIAN; // angleDiff[rad]
     if (radDiff > PI) {
         radDiff -= 2 * PI;
     } else if (radDiff < -PI) {
@@ -85,16 +89,13 @@ float MultipleAS5600::getVelocity(uint8_t _sensorNumber) { // returns [rad/s]
     return angularVelocity;
 }
 
-// :TODO: @ryoskRFR チェックプリーズ
 float MultipleAS5600::getContinuousDegree(uint8_t _sensorNumber) {
- return 0 ;
+    return readDegree(_sensorNumber) + count[_sensorNumber] * 360;
 }
 
-// :TODO: @ryoskRFR チェックプリーズ
 float MultipleAS5600::getContinuousRadian(uint8_t _sensorNumber) {
-    return getContinuousDegree(_sensorNumber) * DEG_TO_RAD;
+    return readRadian(_sensorNumber) + count[_sensorNumber] * TWO_PI;
 }
-
 
 // CW　正回転 CCW 逆回転
 void MultipleAS5600::setDirection(uint8_t _sensorNumber, bool cw) {

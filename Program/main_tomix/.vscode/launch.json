@@ -1,59 +1,66 @@
+// AUTOMATICALLY GENERATED FILE. PLEASE DO NOT MODIFY IT MANUALLY
+//
+// PIO Unified Debugger
+//
+// Documentation: https://docs.platformio.org/page/plus/debugging.html
+// Configuration: https://docs.platformio.org/page/projectconf/section_env_debug.html
+
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "C/C++ Runner: Debug Session",
-      "type": "cppdbg",
-      "request": "launch",
-      "args": [],
-      "stopAtEntry": false,
-      "externalConsole": false,
-      "cwd": "/Users/tomixrm/Desktop/ロボ創造/CharHanMaker/Program/main_tomix/lib/MultipleAS5600",
-      "program": "/Users/tomixrm/Desktop/ロボ創造/CharHanMaker/Program/main_tomix/lib/MultipleAS5600/build/Debug/outDebug",
-      "MIMode": "gdb",
-      "miDebuggerPath": "/Users/tomixrm/.platformio/packages/toolchain-gdbarmnoneeabi/bin/arm-none-eabi-gcc",
-      "setupCommands": [
+    "version": "0.2.0",
+    "configurations": [
         {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
+            "name": "C/C++ Runner: Debug Session",
+            "type": "cppdbg",
+            "request": "launch",
+            "args": [],
+            "stopAtEntry": false,
+            "externalConsole": false,
+            "cwd": "/Users/tomixrm/Desktop/ロボ創造/CharHanMaker/Program/main_tomix/lib/MultipleAS5600",
+            "program": "/Users/tomixrm/Desktop/ロボ創造/CharHanMaker/Program/main_tomix/lib/MultipleAS5600/build/Debug/outDebug",
+            "MIMode": "gdb",
+            "miDebuggerPath": "/Users/tomixrm/.platformio/packages/toolchain-gdbarmnoneeabi/bin/arm-none-eabi-gcc",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug",
+            "executable": "/Users/tomixrm/Desktop/ロボ創造/CharHanMaker/Program/main_tomix/.pio/build/pico/firmware.elf",
+            "projectEnvName": "pico",
+            "toolchainBinDir": "/Users/tomixrm/.platformio/packages/toolchain-rp2040-earlephilhower/bin",
+            "internalConsoleOptions": "openOnSessionStart",
+            "svdPath": "/Users/tomixrm/.platformio/platforms/raspberrypi/misc/svd/rp2040.svd",
+            "preLaunchTask": {
+                "type": "PlatformIO",
+                "task": "Pre-Debug"
+            }
+        },
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug (skip Pre-Debug)",
+            "executable": "/Users/tomixrm/Desktop/ロボ創造/CharHanMaker/Program/main_tomix/.pio/build/pico/firmware.elf",
+            "projectEnvName": "pico",
+            "toolchainBinDir": "/Users/tomixrm/.platformio/packages/toolchain-rp2040-earlephilhower/bin",
+            "internalConsoleOptions": "openOnSessionStart",
+            "svdPath": "/Users/tomixrm/.platformio/platforms/raspberrypi/misc/svd/rp2040.svd"
+        },
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug (without uploading)",
+            "executable": "/Users/tomixrm/Desktop/ロボ創造/CharHanMaker/Program/main_tomix/.pio/build/pico/firmware.elf",
+            "projectEnvName": "pico",
+            "toolchainBinDir": "/Users/tomixrm/.platformio/packages/toolchain-rp2040-earlephilhower/bin",
+            "internalConsoleOptions": "openOnSessionStart",
+            "svdPath": "/Users/tomixrm/.platformio/platforms/raspberrypi/misc/svd/rp2040.svd",
+            "loadMode": "manual"
         }
-      ]
-    },
-    {
-      "type": "platformio-debug",
-      "request": "launch",
-      "name": "PIO Debug",
-      "executable": "/Users/tomixrm/Desktop/ロボ創造/CharHanMaker/Program/main_tomix/.pio/build/pico/firmware.elf",
-      "projectEnvName": "pico",
-      "toolchainBinDir": "/Users/tomixrm/.platformio/packages/toolchain-rp2040-earlephilhower/bin",
-      "internalConsoleOptions": "openOnSessionStart",
-      "svdPath": "/Users/tomixrm/.platformio/platforms/raspberrypi/misc/svd/rp2040.svd",
-      "preLaunchTask": {
-        "type": "PlatformIO",
-        "task": "Pre-Debug"
-      }
-    },
-    {
-      "type": "platformio-debug",
-      "request": "launch",
-      "name": "PIO Debug (skip Pre-Debug)",
-      "executable": "/Users/tomixrm/Desktop/ロボ創造/CharHanMaker/Program/main_tomix/.pio/build/pico/firmware.elf",
-      "projectEnvName": "pico",
-      "toolchainBinDir": "/Users/tomixrm/.platformio/packages/toolchain-rp2040-earlephilhower/bin",
-      "internalConsoleOptions": "openOnSessionStart",
-      "svdPath": "/Users/tomixrm/.platformio/platforms/raspberrypi/misc/svd/rp2040.svd"
-    },
-    {
-      "type": "platformio-debug",
-      "request": "launch",
-      "name": "PIO Debug (without uploading)",
-      "executable": "/Users/tomixrm/Desktop/ロボ創造/CharHanMaker/Program/main_tomix/.pio/build/pico/firmware.elf",
-      "projectEnvName": "pico",
-      "toolchainBinDir": "/Users/tomixrm/.platformio/packages/toolchain-rp2040-earlephilhower/bin",
-      "internalConsoleOptions": "openOnSessionStart",
-      "svdPath": "/Users/tomixrm/.platformio/platforms/raspberrypi/misc/svd/rp2040.svd",
-      "loadMode": "manual"
-    }
-  ]
+    ]
 }
