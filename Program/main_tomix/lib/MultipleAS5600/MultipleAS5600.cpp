@@ -50,13 +50,14 @@ float MultipleAS5600::readRawValue(uint8_t _sensorNumber) {
 uint16_t MultipleAS5600::read12BitValue(uint8_t _sensorNumber) {
     if (_sensorNumber > 7) _sensorNumber = 7;
     uint16_t value = valueZero[_sensorNumber] - readRawValue(_sensorNumber);
-    if (value < 0) value += 4096;
-
+    value = (isCW[_sensorNumber]) ? value : -value;
+    while (value < 0)
+        value += 4096;
     // 回転数カウント
     if (value - valuePrev[_sensorNumber] > 2048)
-        count[_sensorNumber]--;
+        count[_sensorNumber] = count[_sensorNumber] - isCW[sensorNumber] ? 1 : -1;
     else if (value - valuePrev[_sensorNumber] < -2048)
-        count[_sensorNumber]++;
+        count[_sensorNumber] = count[_sensorNumber] + isCW[sensorNumber] ? 1 : -1;
     valuePrev[_sensorNumber] = value;
     return value;
 }
@@ -106,4 +107,8 @@ float MultipleAS5600::setZero(uint8_t _sensorNumber) {
     if (_sensorNumber > 7) _sensorNumber = 7;
     valueZero[_sensorNumber] = readRawValue(_sensorNumber);
     return valueZero[_sensorNumber];
+}
+
+int16_t MultipleAS5600::getRotationCount(uint8_t _sensorNumber) {
+    return count[_sensorNumber];
 }

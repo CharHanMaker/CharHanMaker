@@ -32,8 +32,8 @@ class MultipleAS5600 {
 
     void setDirection(uint8_t _sensorNumber, bool cw); // エンコーダの返す方向の符号を設定
     float setZero(uint8_t _sensorNumber);              // 角度の初期位置をセット
-    int count[8] = {0};
 
+    int16_t getRotationCount(uint8_t _sensorNumber); // 回転数を返す．
   private:
     uint8_t muxAddress;
     uint8_t sensorQty;
@@ -45,6 +45,7 @@ class MultipleAS5600 {
     float valueZero[8] = {0};       //  [DEG]
     float continuousAngle[8] = {0}; // [DEG]
     uint16_t rawValue[8] = {0};
+    int16_t count[8] = {0};
     bool isCW[8] = {true};
 
     TwoWire *i2c;
