@@ -44,6 +44,8 @@ class Robot {
         pinMode(CorePins::Debug_LED, OUTPUT);
         pinMode(CorePins::Alive_LED, OUTPUT);
 
+        analogWriteFreq(10000);  // 必須
+        analogWriteRange(65535); // 必須
         motorA.setSaturation(65535, -65535);
         motorA.begin();
     }
@@ -87,7 +89,6 @@ void setup1() {
     // login
     login1();
     login2();
-
     alive.start();
 }
 

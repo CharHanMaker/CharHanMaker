@@ -91,6 +91,8 @@ class ControlMotorMode : public Mode, Robot {
 
     void after() {
         Serial.printf("after %s\n", getModeName());
+        motorA.stop();
+        motorB.stop();
     }
 
   private:
