@@ -38,14 +38,12 @@ class Robot {
         AbsEncorders.setDirection(1, CCW);
 
         // ピンの設定
+        pinMode(CorePins::Buzzer, OUTPUT);
         pinMode(CorePins::ENG_SW, INPUT);
         pinMode(CorePins::SW, INPUT);
         pinMode(CorePins::Debug_LED, OUTPUT);
         pinMode(CorePins::Alive_LED, OUTPUT);
 
-        // モーターのPWM周波数を設定
-        // analogWriteFreq(10000);
-        // analogWriteRange(65535);
         motorA.setSaturation(65535, -65535);
         motorA.begin();
     }
@@ -58,6 +56,30 @@ TickTwo alive(
     500, 0, MILLIS);
 
 void setup1() {
+    // login
+    tone(CorePins::Buzzer, 3900);
+    delay(10);
+    tone(CorePins::Buzzer, 3000);
+    delay(50);
+    tone(CorePins::Buzzer, 6000);
+    delay(30);
+
+    tone(CorePins::Buzzer, 10000);
+    delay(20);
+    tone(CorePins::Buzzer, 4200);
+    delay(50);
+    noTone(CorePins::Buzzer);
+    delay(200);
+
+    tone(CorePins::Buzzer, 9000);
+    delay(100);
+    tone(CorePins::Buzzer, 7200);
+    delay(100);
+    tone(CorePins::Buzzer, 1200);
+    delay(100);
+    tone(CorePins::Buzzer, 8000);
+    delay(100);
+    noTone(CorePins::Buzzer);
     alive.start();
 }
 

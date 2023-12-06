@@ -26,6 +26,9 @@ const uint8_t Servo1 = 18;
 const uint8_t Servo2 = 19;
 const uint8_t Servo3 = 20;
 
+// Buzzer
+const uint8_t Buzzer = 21;
+
 // PWM(Motor)
 const uint8_t MotorPHA = 7;
 const uint8_t MotorPHB = 9;
