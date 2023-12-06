@@ -2,6 +2,7 @@
 #define __ControlMotorMode__
 
 #include <./Modes/Mode.hpp>
+#include <MotorPID.hpp>
 
 class ControlMotorMode : public Mode, Robot {
     using Robot::Robot;
@@ -30,16 +31,6 @@ class ControlMotorMode : public Mode, Robot {
         highVel = HALF_PI; // rad/s
         lowVel = HALF_PI / 2;
 
-        // set PD gain
-        angleKp[0] = 0;
-        angleKp[1] = 0;
-        angleKd[0] = 0;
-        angleKd[1] = 0;
-        velKp[0] = 0;
-        velKp[1] = 0;
-        velKd[0] = 0;
-        velKd[1] = 0;
-
         interval.reset();
     }
 
@@ -47,8 +38,8 @@ class ControlMotorMode : public Mode, Robot {
         Serial.printf("loop:%d\n waiting for send 'M' ", getModeLetter());
 
         // initialize
-        analogWrite(CorePins::MotorA, 0);
-        analogWrite(CorePins::MotorB, 0);
+        analogWrite(CorePins::MotorENA, 0);
+        analogWrite(CorePins::MotorENB, 0);
 
         // 5ms ごとにセンサの値を読み，角速度を計算し，シリアルモニタに出力する
         // 5ms ごとにモータに入力を与える
@@ -71,20 +62,21 @@ class ControlMotorMode : public Mode, Robot {
 
             // ここに制御則とか書く
             if (vel[0] < lowVel || vel[1] < lowVel) { // 目標の低角速度まで加速
-                analogWrite(CorePins::MotorA, voltToDuty(12));
-                analogWrite(CorePins::MotorB, voltToDuty(12));
+                analogWrite(CorePins::MotorENA, voltToDuty(12));
+                analogWrite(CorePins::MotorENB, voltToDuty(12));
             } else { // 運転できるようになってからの制御
+                // 目標角速度を決める、
             }
 
             // input voltage to motor (0~12V)
             // 入力電圧のsaturationを書く
-            analogWrite(CorePins::MotorA, voltToDuty(12)); // ここ12の値を変更
-            analogWrite(CorePins::MotorB, voltToDuty(12));
+            analogWrite(CorePins::MotorENA, voltToDuty(12)); // ここ12の値を変更
+            analogWrite(CorePins::MotorENB, voltToDuty(12));
         }
 
         // end process
-        analogWrite(CorePins::MotorA, 0);
-        analogWrite(CorePins::MotorB, 0);
+        analogWrite(CorePins::MotorENA, 0);
+        analogWrite(CorePins::MotorENB, 0);
         Serial.printf("end...Send T to continue\n");
         delay(10000);
     }
