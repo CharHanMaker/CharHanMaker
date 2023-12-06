@@ -24,6 +24,7 @@ void loop() {
                 currentMode->after();
                 currentMode = modes[i];
                 currentMode->before();
+                login1();
             }
         }
     }
