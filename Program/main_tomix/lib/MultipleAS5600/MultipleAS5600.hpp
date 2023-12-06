@@ -10,8 +10,8 @@
 #define MUX_ADDR 0x70    // TCA9548A default address
 #define AS5600_ADDR 0x36 // AS5600 default address
 #define LPF_COEFF 0.05   // LPF coefficient
-#define BIT_12_TO_RADIAN 0.00153398078
-#define BIT_12_TO_DEGREE 0.087890625
+#define BIT_12_TO_RADIAN 0.00153435538
+#define BIT_12_TO_DEGREE 0.08791208791
 #define VALUE_ERROR 4097
 
 class MultipleAS5600 {
@@ -34,19 +34,21 @@ class MultipleAS5600 {
     float setZero(uint8_t _sensorNumber);              // 角度の初期位置をセット
 
     int16_t getRotationCount(uint8_t _sensorNumber); // 回転数を返す．
+    void resetRotationCount(uint8_t _sensorNumber);  // 回転数をリセットする．
   private:
     uint8_t muxAddress;
     uint8_t sensorQty;
     uint8_t sensorNumber;
     uint8_t prevPort;
 
-    float valueArray[8] = {0};      // [DEG]
-    float valuePrev[8] = {0};       // [DEG]
-    float valueZero[8] = {0};       //  [DEG]
+    int16_t valueArray[8] = {0};    // [DEG]
+    int16_t valuePrev[8] = {0};     // [DEG]
+    int16_t valueZero[8] = {0};     //  [DEG]
     float continuousAngle[8] = {0}; // [DEG]
     uint16_t rawValue[8] = {0};
     int16_t count[8] = {0};
     bool isCW[8] = {true};
+    float dt[8] = {0};
 
     TwoWire *i2c;
     timer velTimer[8];

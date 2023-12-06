@@ -25,10 +25,13 @@ class MainMode : public Mode, Robot {
     }
 
     void loop() {
-        float angle0 = AbsEncorders.readDegree(0);
-        float vel0 = AbsEncorders.getVelocity(0);
-        float angleC = AbsEncorders.getContinuousDegree(0);
-        Serial.printf("%.02f, %.02f, %.02f\n", angle0, vel0, angleC);
+        // float angle0 = AbsEncorders.readDegree(0);
+        // float vel0 = AbsEncorders.getVelocity(0);
+        // float angleC = AbsEncorders.getContinuousDegree(0);
+        // Serial.printf("%.02f, %.02f, %.02f\n", angle0, vel0, angleC);
+
+        Serial.printf("%f, %d\n", AbsEncorders.getContinuousDegree(0), AbsEncorders.getRotationCount(0));
+        delay(1);
         // float vel0 = AbsEncorders.getVelocity(0);
         // float vel1 = AbsEncorders.getVelocity(1);
         // float continuousAngle0 = AbsEncorders.getContinuousDegree(0);

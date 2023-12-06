@@ -49,17 +49,22 @@ float MultipleAS5600::readRawValue(uint8_t _sensorNumber) {
 
 uint16_t MultipleAS5600::read12BitValue(uint8_t _sensorNumber) {
     if (_sensorNumber > 7) _sensorNumber = 7;
-    uint16_t value = valueZero[_sensorNumber] - readRawValue(_sensorNumber);
-    value = (isCW[_sensorNumber]) ? value : -value;
+    int16_t value = valueZero[_sensorNumber] - readRawValue(_sensorNumber);
+    // value = (isCW[_sensorNumber]) ? value : -value;
     while (value < 0)
         value += 4096;
+    valuePrev[_sensorNumber] = valueArray[_sensorNumber];
+    valueArray[_sensorNumber] = value;
     // 回転数カウント
-    if (value - valuePrev[_sensorNumber] > 2048)
-        count[_sensorNumber] = count[_sensorNumber] - isCW[sensorNumber] ? 1 : -1;
-    else if (value - valuePrev[_sensorNumber] < -2048)
-        count[_sensorNumber] = count[_sensorNumber] + isCW[sensorNumber] ? 1 : -1;
-    valuePrev[_sensorNumber] = value;
-    return value;
+    if (valueArray[_sensorNumber] - valuePrev[_sensorNumber] > 2048) {
+        count[_sensorNumber] = count[_sensorNumber] + (isCW[sensorNumber] ? 1 : -1);
+    } else if (valueArray[_sensorNumber] - valuePrev[_sensorNumber] < -2048) {
+        count[_sensorNumber] = count[_sensorNumber] - (isCW[sensorNumber] ? 1 : -1);
+    }
+
+    dt[_sensorNumber] = (float)velTimer[_sensorNumber].read_us() / 1000000;
+    velTimer[_sensorNumber].reset();
+    return uint16_t(value);
 }
 
 float MultipleAS5600::readDegree(uint8_t _sensorNumber) { // returns [deg]
@@ -72,19 +77,16 @@ float MultipleAS5600::readRadian(uint8_t _sensorNumber) { // returns [rad]
 
 float MultipleAS5600::getVelocity(uint8_t _sensorNumber) { // returns [rad/s]
     if (_sensorNumber > 7) _sensorNumber = 7;
-    if (valueArray[_sensorNumber] == VALUE_ERROR) return VALUE_ERROR; // error
-    float value = valueArray[_sensorNumber];
-    float dt = (float)velTimer[_sensorNumber].read_us() / 1000000;
-    velTimer[_sensorNumber].reset();
-    float radDiff = (valuePrev[_sensorNumber] - value) * BIT_12_TO_RADIAN; // angleDiff[rad]
+    if (valueArray[_sensorNumber] == VALUE_ERROR) return VALUE_ERROR;                               // erro
+    float radDiff = float(valuePrev[_sensorNumber] - valueArray[_sensorNumber]) * BIT_12_TO_RADIAN; // angleDiff[rad];
     if (radDiff > PI) {
         radDiff -= 2 * PI;
     } else if (radDiff < -PI) {
         radDiff += 2 * PI;
     }
-    float angularVelocity = radDiff / dt; // [rad/s]
+    float angularVelocity = radDiff / dt[_sensorNumber]; // [rad/s]
     if (abs(radDiff) > PI && angularVelocity != 0) {
-        angularVelocity += (angularVelocity > 0) ? -2 * PI / dt : 2 * PI / dt;
+        angularVelocity += (angularVelocity > 0) ? -2 * PI / dt[_sensorNumber] : 2 * PI / dt[_sensorNumber];
     }
     angularVelocity = velocityLPF[_sensorNumber].update(angularVelocity); // [rad/s]
     return angularVelocity;
@@ -111,4 +113,8 @@ float MultipleAS5600::setZero(uint8_t _sensorNumber) {
 
 int16_t MultipleAS5600::getRotationCount(uint8_t _sensorNumber) {
     return count[_sensorNumber];
+}
+
+void MultipleAS5600::resetRotationCount(uint8_t _sensorNumber) {
+    count[_sensorNumber] = 0;
 }
