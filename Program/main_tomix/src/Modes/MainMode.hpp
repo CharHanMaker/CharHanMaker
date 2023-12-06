@@ -20,8 +20,6 @@ class MainMode : public Mode, Robot {
             zeroPos[0] = AbsEncorders.setZero(0);
             zeroPos[1] = AbsEncorders.setZero(1);
         }
-        Serial.printf("zeroPos[0]: %.02f, zeroPos[1]: %.02f\n", zeroPos[0], zeroPos[1]);
-        delay(1000);
     }
 
     void loop() {
