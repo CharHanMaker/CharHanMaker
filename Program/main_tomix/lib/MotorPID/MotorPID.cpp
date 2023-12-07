@@ -21,25 +21,23 @@ void MotorPid::resetPID() {
     pidAngle.reset();
 }
 
-void MotorPid::velControl(float radPerSec) { // 目標値
-    //: TODO: PID制御
-    // @ryoskRFR 速度のPID制御を追加してもろて
+int32_t MotorPid::velControl(float radPerSec) { // 目標角速度rad/sが引数のPID制御関数
     encoder->readRadian(encoderPort);
     velAngular = encoder->getVelocity(encoderPort);
     error = radPerSec - velAngular;
 
     pidVel.appendError(error);
     pidVel.compute();
-    out = pidVel.getPID();
+    return out = pidVel.getPID();
 
-    Motor::runOpenloop(out); // これは外に出す
+    // Motor::runOpenloop(out); // これは外に出す
 }
 
-void MotorPid::angleControl(float rad) { // 引数は目標値
+int32_t MotorPid::angleControl(float rad) { // 目標角radが引数のPID制御関数
     angle = encoder->readRadian(encoderPort);
     error = rad - angle;
 
     pidAngle.appendError(error);
     pidAngle.compute();
-    out = pidAngle.getPID();
+    return out = pidAngle.getPID();
 }

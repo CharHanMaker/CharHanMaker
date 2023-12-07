@@ -27,9 +27,17 @@ class ControlMotorMode : public Mode, Robot {
             currentAngle[i] = 0;
             roundCnt[i] = 0;
             velPrev[i] = 0;
+
+            goalAngle[i] = 0;
+            goalVel[i] = 0;
+
+            volt[i] = 0;
         }
         highVel = HALF_PI; // rad/s
         lowVel = HALF_PI / 2;
+
+        currentTime = 0;
+        cycleTime = 1.0;
 
         interval.reset();
     }
@@ -62,10 +70,20 @@ class ControlMotorMode : public Mode, Robot {
 
             // ここに制御則とか書く
             if (vel[0] < lowVel || vel[1] < lowVel) { // 目標の低角速度まで加速
-                analogWrite(CorePins::MotorENA, voltToDuty(12));
-                analogWrite(CorePins::MotorENB, voltToDuty(12));
+                for (uint8_t i = 0; i < 2; i++) {
+                    volt[i]++;
+                }
+                synchronizeMotors();
+                motorA.runOpenloop(volt[0]);
+                motorB.runOpenloop(volt[1]);
             } else { // 運転できるようになってからの制御
                 // 目標角速度を決める、
+
+                // 積分して目標角を出す
+                // 目標角速度と目標角をコントローラに入れてPID制御
+                synchronizeMotors();
+                motorA.runOpenloop(volt[0]);
+                motorB.runOpenloop(volt[1]);
             }
 
             // input voltage to motor (0~12V)
@@ -102,12 +120,23 @@ class ControlMotorMode : public Mode, Robot {
     float highVel, lowVel;
     float goalAngle[2];
     float goalVel[2];
-    float volt[2]; // モータに入力する電圧
+    int32_t volt[2]; // モータに入力する電圧のpwm
     float angleKp[2], angleKd[2], velKp[2], velKd[2];
     float angleMaster, angleSlave;
+    float currentTime, cycleTime; // 累計時間と周期[s]
 
     uint16_t voltToDuty(float volt) {
         return volt * 65535 / 12;
+    }
+
+    // 常にAがmaster, Bがslave
+    // angleの差に応じたpwm操作できると良いね
+    void synchronizeMotors() {
+        if (angle[0] < angle[1]) { // AがBに遅れてる
+            volt[1]--;
+        } else if (angle[0] > angle[1]) { // AがBより進んでる
+            volt[1]++;
+        }
     }
 };
 
