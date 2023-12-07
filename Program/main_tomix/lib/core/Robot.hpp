@@ -48,6 +48,8 @@ class Robot {
         analogWriteRange(65535); // 必須
         motorA.setSaturation(65535, -65535);
         motorA.begin();
+        motorB.setSaturation(65535, -65535);
+        motorB.begin();
     }
 };
 

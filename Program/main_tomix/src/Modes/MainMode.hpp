@@ -10,11 +10,14 @@ class MainMode : public Mode, Robot {
     MainMode(char letter, const char name[]) : Mode(letter, name) {}
     void init() {
         deviceBegin();
-        i = 0;
         for (size_t i = 0; i < 10; i++) {
             AbsEncorders.setZero(0);
             AbsEncorders.setZero(1);
         }
+    }
+
+    void before() {
+        i = 0;
     }
 
     void loop() {
