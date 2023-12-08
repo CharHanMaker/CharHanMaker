@@ -25,7 +25,8 @@ class ControlMotorMode : public Mode, Robot {
         for (uint8_t i = 0; i < 2; i++) {
             initialAngle[i] = AbsEncorders.setZero(i);
             continuousAngle[i] = 0;
-            rotationCnt[i] = AbsEncorders.resetRotationCount(i);
+            AbsEncorders.resetRotationCount(i);
+            rotationCnt[i] = AbsEncorders.getRotationCount(i);
             velPrev[i] = 0;
 
             goalAngle[i] = 0;
