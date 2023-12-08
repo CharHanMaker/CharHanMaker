@@ -24,6 +24,9 @@ typedef union {
     uint8_t bytes[2]; // byte array
 } byteSplitterInt16;
 
+void readEncoderZeroPos(uint16_t &rawValue0, uint16_t &rawValue1);
+void writeEncoderZeroPos(uint16_t rawValue0, uint16_t rawValue1);
+
 class Robot {
   public:
     Robot() {}
@@ -118,7 +121,6 @@ void readEncoderZeroPos(uint16_t &rawValue0, uint16_t &rawValue1) { // EEPROM
     }
     rawValue0 = dataFrame[0].dataInt;
     rawValue1 = dataFrame[1].dataInt;
-    delay(2000);
 }
 
 void writeEncoderZeroPos(uint16_t rawValue0, uint16_t rawValue1) { // EEPROM
