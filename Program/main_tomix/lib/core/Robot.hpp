@@ -62,7 +62,7 @@ TickTwo alive(
 
 void login1() {
     tone(CorePins::Buzzer, 3900);
-    delay(10);
+    delay(20);
     tone(CorePins::Buzzer, 3000);
     delay(50);
     tone(CorePins::Buzzer, 6000);
@@ -73,7 +73,6 @@ void login1() {
     tone(CorePins::Buzzer, 4200);
     delay(50);
     noTone(CorePins::Buzzer);
-    delay(200);
 }
 
 void login2() {
@@ -88,9 +87,24 @@ void login2() {
     noTone(CorePins::Buzzer);
 }
 
+void logout1() {
+    tone(CorePins::Buzzer, 6000);
+    delay(20);
+    tone(CorePins::Buzzer, 11000);
+    delay(50);
+    tone(CorePins::Buzzer, 2000);
+    delay(50);
+    tone(CorePins::Buzzer, 6000);
+    delay(30);
+    tone(CorePins::Buzzer, 4000);
+    delay(50);
+    noTone(CorePins::Buzzer);
+}
+
 void setup1() {
     // login
     login1();
+    delay(200);
     login2();
     alive.start();
 }
