@@ -10,6 +10,7 @@
             "includePath": [
                 "C:/Users/81909/Documents/ロボティクス学科/3回生_秋/ロボット創造実験/Code/CharHanMaker/Program/main_tomix/include",
                 "C:/Users/81909/Documents/ロボティクス学科/3回生_秋/ロボット創造実験/Code/CharHanMaker/Program/main_tomix/src",
+                "C:/Users/81909/Documents/ロボティクス学科/3回生_秋/ロボット創造実験/Code/CharHanMaker/Program/main_tomix/lib/MotorPID",
                 "C:/Users/81909/Documents/ロボティクス学科/3回生_秋/ロボット創造実験/Code/CharHanMaker/Program/main_tomix/lib/Drive",
                 "C:/Users/81909/Documents/ロボティクス学科/3回生_秋/ロボット創造実験/Code/CharHanMaker/Program/main_tomix/lib/PID",
                 "C:/Users/81909/Documents/ロボティクス学科/3回生_秋/ロボット創造実験/Code/CharHanMaker/Program/main_tomix/lib/MultipleAS5600",
@@ -87,7 +88,6 @@
                 "C:/Users/81909/.platformio/packages/framework-arduinopico/pico-sdk/lib/btstack/platform/embedded",
                 "C:/Users/81909/.platformio/packages/framework-arduinopico/include",
                 "C:/Users/81909/.platformio/packages/framework-arduinopico/variants/rpipico",
-                "C:/Users/81909/Documents/ロボティクス学科/3回生_秋/ロボット創造実験/Code/CharHanMaker/Program/main_tomix/lib/MotorPID",
                 "C:/Users/81909/.platformio/packages/framework-arduinopico/libraries/ADCInput/src",
                 "C:/Users/81909/.platformio/packages/framework-arduinopico/libraries/ArduinoOTA/src",
                 "C:/Users/81909/.platformio/packages/framework-arduinopico/libraries/AudioBufferManager/src",
@@ -145,6 +145,7 @@
                 "path": [
                     "C:/Users/81909/Documents/ロボティクス学科/3回生_秋/ロボット創造実験/Code/CharHanMaker/Program/main_tomix/include",
                     "C:/Users/81909/Documents/ロボティクス学科/3回生_秋/ロボット創造実験/Code/CharHanMaker/Program/main_tomix/src",
+                    "C:/Users/81909/Documents/ロボティクス学科/3回生_秋/ロボット創造実験/Code/CharHanMaker/Program/main_tomix/lib/MotorPID",
                     "C:/Users/81909/Documents/ロボティクス学科/3回生_秋/ロボット創造実験/Code/CharHanMaker/Program/main_tomix/lib/Drive",
                     "C:/Users/81909/Documents/ロボティクス学科/3回生_秋/ロボット創造実験/Code/CharHanMaker/Program/main_tomix/lib/PID",
                     "C:/Users/81909/Documents/ロボティクス学科/3回生_秋/ロボット創造実験/Code/CharHanMaker/Program/main_tomix/lib/MultipleAS5600",
@@ -222,7 +223,6 @@
                     "C:/Users/81909/.platformio/packages/framework-arduinopico/pico-sdk/lib/btstack/platform/embedded",
                     "C:/Users/81909/.platformio/packages/framework-arduinopico/include",
                     "C:/Users/81909/.platformio/packages/framework-arduinopico/variants/rpipico",
-                    "C:/Users/81909/Documents/ロボティクス学科/3回生_秋/ロボット創造実験/Code/CharHanMaker/Program/main_tomix/lib/MotorPID",
                     "C:/Users/81909/.platformio/packages/framework-arduinopico/libraries/ADCInput/src",
                     "C:/Users/81909/.platformio/packages/framework-arduinopico/libraries/ArduinoOTA/src",
                     "C:/Users/81909/.platformio/packages/framework-arduinopico/libraries/AudioBufferManager/src",

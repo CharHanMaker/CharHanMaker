@@ -23,9 +23,9 @@ class ControlMotorMode : public Mode, Robot {
         }
 
         for (uint8_t i = 0; i < 2; i++) {
-            startAngle[i] = angle[i];
-            currentAngle[i] = 0;
-            roundCnt[i] = 0;
+            initialAngle[i] = AbsEncorders.setZero(i);
+            continuousAngle[i] = 0;
+            rotationCnt[i] = AbsEncorders.resetRotationCount(i);
             velPrev[i] = 0;
 
             goalAngle[i] = 0;
@@ -37,11 +37,11 @@ class ControlMotorMode : public Mode, Robot {
         highVel = HALF_PI; // rad/s
         lowVel = HALF_PI / 2;
 
-        currentTime = 0; // ms
-        cycleTime = 400; // 0.4s
+        continuousTime = 0; // ms
+        cycleTime = 400;    // 0.4s
 
         interval.reset();
-        currentTimer.reset(); // [ms]
+        continuousTimer.reset(); // [ms]
         integralTime = 0;
     }
 
@@ -55,23 +55,20 @@ class ControlMotorMode : public Mode, Robot {
             for (uint8_t i = 0; i < 2; i++) {
                 velPrev[i] = vel[i];
                 angle[i] = AbsEncorders.readRadian(i); // i番目のエンコーダの弧度を取得
-                vel[i] = -AbsEncorders.getVelocity(i); // i番目のエンコーダの角速度を取得[rad/s]
+                vel[i] = -AbsEncorders.getVelocity(i); // i番目のエンコーダの角速度を取得[rad/s] これのマイナスどうする？
                 acc[i] = (vel[i] - velPrev[i]) / Ts;
 
-                // モータが１周回転したことを確認 velPrevは間違い
-                // if (0 <= angle[i] && angle[i] < PI && PI < velPrev[i] && velPrev[i] < TWO_PI)
-                //     roundCnt[i]++;
-
-                // currentAngle[i] = (float)roundCnt[i] * TWO_PI + angle[i] - startAngle[i];
+                rotationCnt[i] = AbsEncorders.getRotationCount(i);                          // overflow対策どうする 片方3000回転でもう片方が30回転とかあり得る
+                continuousAngle[i] = AbsEncorders.getContinuousRadian(i) - initialAngle[i]; // rotationCntでoverflowを対処するので、ここでは考慮しなくて良い
             }
 
             // 目標角速度を決める、
-            integralTime = currentTimer.read_ms(); // uint8_t と unsigned long だからerrorが生じるかも
-            currentTime += integralTime;
-            if (currentTime > 100 * cycleTime) currentTime -= 99 * cycleTime;
-            currentTimer.reset();
+            integralTime = continuousTimer.read_ms(); // uint8_t と unsigned long だからerrorが生じるかも
+            continuousTime += integralTime;
+            if (continuousTime > 100 * cycleTime) continuousTime -= 99 * cycleTime;
+            continuousTimer.reset();
 
-            if (currentTime % cycleTime <= 300) { // t < T*3/4
+            if (continuousTime % cycleTime <= 300) { // t < T*3/4
                 for (uint8_t i = 0; i < 2; i++) {
                     goalVelPrev[i] = goalVel[i]; // 更新
                     goalVel[i] = lowVel;
@@ -122,16 +119,16 @@ class ControlMotorMode : public Mode, Robot {
   private:
     timer interval;
     const float Ts = 0.005; // 周期[s]
-    timer currentTimer;     // [ms]
+    timer continuousTimer;  // [ms]
 
     // エンコーダ系
-    float angle[2];        // 0 ~ 2pi rad
-    float startAngle[2];   // 0 ~ 2pi rad
-    float currentAngle[2]; // 0 ~ float_max rad : 累積弧度
-    float vel[2];          // rad/s
-    float acc[2];          // rad/s/s
+    float angle[2];           // 0 ~ 2pi rad
+    float initialAngle[2];    // 0 ~ 2pi rad
+    float continuousAngle[2]; // 0 ~ float_max rad : 累計弧度
+    float vel[2];             // rad/s
+    float acc[2];             // rad/s/s
     float velPrev[2];
-    uint8_t roundCnt[2]; // 何周したかをカウント
+    int16_t rotationCnt[2]; // 何周したかをカウント
 
     // 制御系
     float highVel, lowVel;
@@ -140,12 +137,12 @@ class ControlMotorMode : public Mode, Robot {
     float goalVelPrev[2];
     int32_t volt[2]; // モータに入力する電圧のpwm
     // float angleMaster, angleSlave; // master : A, slave : B で固定するから要らないかも
-    unsigned long currentTime, cycleTime; // 累計時間と周期[ms]
+    unsigned long continuousTime, cycleTime; // 累計時間と周期[ms]
     uint8_t integralTime;
 
-    uint16_t voltToDuty(float volt) {
-        return volt * 65535 / 12;
-    }
+    // uint16_t voltToDuty(float volt) { // 要らない？
+    //     return volt * 65535 / 12;
+    // }
 
     // 常にAがmaster, Bがslave
     // angleの差に応じたpwm操作できると良いね
