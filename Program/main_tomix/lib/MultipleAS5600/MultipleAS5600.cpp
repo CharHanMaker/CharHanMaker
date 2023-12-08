@@ -115,6 +115,12 @@ float MultipleAS5600::setZero(uint8_t _sensorNumber) {
     return valueZero[_sensorNumber];
 }
 
+float MultipleAS5600::setZero(uint8_t _sensorNumber, uint16_t rawValue) {
+    if (_sensorNumber > 7) _sensorNumber = 7;
+    valueZero[_sensorNumber] = int16_t(rawValue);
+    return valueZero[_sensorNumber];
+}
+
 int16_t MultipleAS5600::getRotationCount(uint8_t _sensorNumber) {
     return count[_sensorNumber];
 }
