@@ -65,8 +65,9 @@ class SensorTestMode : public Mode, Robot {
             Serial.println();
             delay(10);
         } else if (checkType >= '7' && checkType <= '8') {
-            // EEPROMの設定
+            // EEPROMの関連
             if (checkType == '7') {
+                // EEPROMから保存されているエンコーダの初期位置を読み出す
                 Serial.println("Read from EEPROM");
                 uint16_t rawValue0, rawValue1;
                 readEncoderZeroPos(rawValue0, rawValue1);
@@ -75,11 +76,12 @@ class SensorTestMode : public Mode, Robot {
                 AbsEncorders.setZero(1, rawValue1);
                 login2();
             } else if (checkType <= '8') {
+                // EEPROMにエンコーダの初期位置を書き込んで保存する
                 for (size_t i = 0; i < 10; i++) { // 空読み
                     AbsEncorders.readRawValue(0);
                     AbsEncorders.readRawValue(1);
                 }
-                // 平均取得
+                // エンコーダの値の平均取得
                 uint32_t rawValue[2] = {0};
                 for (size_t i = 0; i < 20; i++) {
                     rawValue[0] += AbsEncorders.readRawValue(0);
@@ -90,7 +92,7 @@ class SensorTestMode : public Mode, Robot {
                 rawValue[1] /= 20;
                 Serial.println("Write to EEPROM");
                 Serial.printf("ZeroDeg0:%.2f, ZeroDeg1:%.2f\n", float(rawValue[0] * BIT_12_TO_DEGREE), float(rawValue[1] * BIT_12_TO_DEGREE));
-                writeEncoderZeroPos(uint16_t(rawValue[0]), uint16_t(rawValue[1]));
+                writeEncoderZeroPos(uint16_t(rawValue[0]), uint16_t(rawValue[1])); // EEPROM書き込み
             }
             delay(1000);
             checkType = '-';
