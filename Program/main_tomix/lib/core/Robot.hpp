@@ -62,6 +62,12 @@ class Robot {
         motorA.begin();
         motorB.setSaturation(65535, -65535);
         motorB.begin();
+
+        for (size_t i = 0; i < 5; i++) {
+            // 空読み
+            AbsEncorders.readRawValue(0);
+            AbsEncorders.readRawValue(1);
+        }
     }
 };
 
