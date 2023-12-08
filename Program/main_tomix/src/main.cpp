@@ -1,11 +1,13 @@
 #include <Robot.hpp>
 #include <./Modes/MainMode.hpp>
 #include <./Modes/ModeTemp.hpp>
+#include <./Modes/ControlMotorMode.hpp>
 
 #define MODE_QTY 2
 
 MainMode mainMode('M', "MainMode");
 TempMode tempMode('T', "TempMode");
+ControlMotorMode controlMode('C', "ContralMotorMode");
 
 Mode *modes[MODE_QTY] = {&mainMode, &tempMode};
 Mode *currentMode = &tempMode;
