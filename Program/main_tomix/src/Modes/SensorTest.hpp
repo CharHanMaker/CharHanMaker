@@ -35,6 +35,7 @@ class SensorTestMode : public Mode, Robot {
                 Serial.println(": resend...!!");
             }
         } while (checkType == '-');
+        login1();
     }
 
     void loop() {
