@@ -3,18 +3,19 @@
 #include <./Modes/ModeTemp.hpp>
 #include <./Modes/ControlMotorMode.hpp>
 
-#define MODE_QTY 2
+#define MODE_QTY 3
 
 MainMode mainMode('M', "MainMode");
 TempMode tempMode('T', "TempMode");
-ControlMotorMode controlMode('C', "ContralMotorMode");
+ControlMotorMode controlMode('C', "ControlMotorMode");
 
-Mode *modes[MODE_QTY] = {&mainMode, &tempMode};
+Mode *modes[MODE_QTY] = {&mainMode, &tempMode, &controlMode};
 Mode *currentMode = &tempMode;
 
 void setup() {
     mainMode.init();
     tempMode.init();
+    controlMode.init();
 }
 
 void loop() {

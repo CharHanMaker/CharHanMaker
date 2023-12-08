@@ -17,7 +17,7 @@ class ControlMotorMode : public Mode, Robot {
     void before() {
         Serial.printf("before %s\n", getModeName());
 
-        for (size_t i = 0; i < 50; i++) {
+        for (size_t i = 0; i < 50; i++) {          // これ要る？
             angle[0] = AbsEncorders.readRadian(0); // 0番目のエンコーダの角度を取得
             angle[1] = AbsEncorders.readRadian(1); // 1番目のエンコーダの角度を取得
         }
@@ -89,7 +89,7 @@ class ControlMotorMode : public Mode, Robot {
             // ここに制御則とか書く
             if (vel[0] < lowVel || vel[1] < lowVel) { // 目標の低角速度まで加速
                 for (uint8_t i = 0; i < 2; i++)
-                    volt[i]++;
+                    volt[i] += 15;
             } else { // 実機が立ち上がってからの制御
                 // 目標角速度と目標角をコントローラに入れてPID制御
                 volt[0] = motorA.velControl(goalVel[0]) + motorA.angleControl(goalAngle[0]);
@@ -140,9 +140,9 @@ class ControlMotorMode : public Mode, Robot {
     // angleの差に応じたpwm操作できると良いね
     void synchronizeMotors() {
         if (angle[0] < angle[1]) { // AがBに遅れてる
-            volt[1]--;
+            volt[1] -= 15;
         } else if (angle[0] > angle[1]) { // AがBより進んでる
-            volt[1]++;
+            volt[1] += 15;
         }
     }
 };
