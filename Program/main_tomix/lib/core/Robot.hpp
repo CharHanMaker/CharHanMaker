@@ -9,6 +9,7 @@
 #include <timer.h>
 #include "LPF.hpp"
 #include "MultipleAS5600.hpp"
+#include <MotorPID.hpp>
 
 typedef struct {
     uint16_t angleLeft;    //[deg]
@@ -22,8 +23,8 @@ class Robot {
     Robot() {}
     timer Time;
     MultipleAS5600 AbsEncorders = MultipleAS5600(Wire, 0x70, 2);
-    Motor motorA = Motor(CorePins::MotorPHA, CorePins::MotorENA, &AbsEncorders, 0);
-    Motor motorB = Motor(CorePins::MotorPHB, CorePins::MotorENB, &AbsEncorders, 1);
+    MotorPid motorA = MotorPid(CorePins::MotorPHA, CorePins::MotorENA, &AbsEncorders, 0);
+    MotorPid motorB = MotorPid(CorePins::MotorPHB, CorePins::MotorENB, &AbsEncorders, 1);
     sensors_t sensors;
 
     void deviceBegin() {

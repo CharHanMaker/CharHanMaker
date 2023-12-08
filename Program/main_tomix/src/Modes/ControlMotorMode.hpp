@@ -2,6 +2,7 @@
 #define __ControlMotorMode__
 
 #include <./Modes/Mode.hpp>
+#include <MotorPID.hpp>
 
 class ControlMotorMode : public Mode, Robot {
     using Robot::Robot;
@@ -26,30 +27,25 @@ class ControlMotorMode : public Mode, Robot {
             currentAngle[i] = 0;
             roundCnt[i] = 0;
             velPrev[i] = 0;
+
+            goalAngle[i] = 0;
+            goalVel[i] = 0;
+            goalVelPrev[i] = 0;
+
+            volt[i] = 0;
         }
         highVel = HALF_PI; // rad/s
         lowVel = HALF_PI / 2;
 
-        // set PD gain
-        angleKp[0] = 0;
-        angleKp[1] = 0;
-        angleKd[0] = 0;
-        angleKd[1] = 0;
-        velKp[0] = 0;
-        velKp[1] = 0;
-        velKd[0] = 0;
-        velKd[1] = 0;
+        currentTime = 0; // ms
+        cycleTime = 400; // 0.4s
 
         interval.reset();
+        currentTimer.reset(); // [ms]
+        integralTime = 0;
     }
 
     void loop() {
-        Serial.printf("loop:%d\n waiting for send 'M' ", getModeLetter());
-
-        // initialize
-        analogWrite(CorePins::MotorA, 0);
-        analogWrite(CorePins::MotorB, 0);
-
         // 5ms ごとにセンサの値を読み，角速度を計算し，シリアルモニタに出力する
         // 5ms ごとにモータに入力を与える
         if (interval.read_us() >= Ts * 1000000) {
@@ -62,31 +58,59 @@ class ControlMotorMode : public Mode, Robot {
                 vel[i] = -AbsEncorders.getVelocity(i); // i番目のエンコーダの角速度を取得[rad/s]
                 acc[i] = (vel[i] - velPrev[i]) / Ts;
 
-                // モータが１周回転したことを確認
-                if (0 <= angle[i] && angle[i] < PI && PI < velPrev[i] && velPrev[i] < TWO_PI)
-                    roundCnt[i]++;
+                // モータが１周回転したことを確認 velPrevは間違い
+                // if (0 <= angle[i] && angle[i] < PI && PI < velPrev[i] && velPrev[i] < TWO_PI)
+                //     roundCnt[i]++;
 
-                currentAngle[i] = (float)roundCnt[i] * TWO_PI + angle[i] - startAngle[i];
+                // currentAngle[i] = (float)roundCnt[i] * TWO_PI + angle[i] - startAngle[i];
+            }
+
+            // 目標角速度を決める、
+            integralTime = currentTimer.read_ms(); // uint8_t と unsigned long だからerrorが生じるかも
+            currentTime += integralTime;
+            if (currentTime > 100 * cycleTime) currentTime -= 99 * cycleTime;
+            currentTimer.reset();
+
+            if (currentTime % cycleTime <= 300) { // t < T*3/4
+                for (uint8_t i = 0; i < 2; i++) {
+                    goalVelPrev[i] = goalVel[i]; // 更新
+                    goalVel[i] = lowVel;
+                }
+            } else {
+                for (uint8_t i = 0; i < 2; i++) {
+                    goalVelPrev[i] = goalVel[i]; // 更新
+                    goalVel[i] = highVel;
+                }
+            }
+
+            // 台形積分して目標角を出す overflow対策どうしよう
+            for (uint8_t i = 0; i < 2; i++) {
+                goalAngle[i] = (goalVelPrev[i] + goalVel[i]) * integralTime / 2; // uint8_tを割ってるので微誤差発生
             }
 
             // ここに制御則とか書く
             if (vel[0] < lowVel || vel[1] < lowVel) { // 目標の低角速度まで加速
-                analogWrite(CorePins::MotorA, voltToDuty(12));
-                analogWrite(CorePins::MotorB, voltToDuty(12));
+                for (uint8_t i = 0; i < 2; i++)
+                    volt[i]++;
+
+                synchronizeMotors(); // 申し訳程度の同期
+                motorA.runOpenloop(volt[0], true);
+                motorB.runOpenloop(volt[1], true);
             } else { // 運転できるようになってからの制御
+                // 目標角速度と目標角をコントローラに入れてPID制御
+                volt[0] = motorA.velControl(goalVel[0]) + motorA.angleControl(goalAngle[0]);
+                volt[1] = motorB.velControl(goalVel[1]) + motorB.angleControl(goalAngle[1]);
+
+                synchronizeMotors(); // 申し訳程度の同期
+                motorA.runOpenloop(volt[0], true);
+                motorB.runOpenloop(volt[1], true);
             }
 
             // input voltage to motor (0~12V)
             // 入力電圧のsaturationを書く
-            analogWrite(CorePins::MotorA, voltToDuty(12)); // ここ12の値を変更
-            analogWrite(CorePins::MotorB, voltToDuty(12));
+            analogWrite(CorePins::MotorENA, voltToDuty(12)); // ここ12の値を変更
+            analogWrite(CorePins::MotorENB, voltToDuty(12));
         }
-
-        // end process
-        analogWrite(CorePins::MotorA, 0);
-        analogWrite(CorePins::MotorB, 0);
-        Serial.printf("end...Send T to continue\n");
-        delay(10000);
     }
 
     void after() {
@@ -98,6 +122,7 @@ class ControlMotorMode : public Mode, Robot {
   private:
     timer interval;
     const float Ts = 0.005; // 周期[s]
+    timer currentTimer;     // [ms]
 
     // エンコーダ系
     float angle[2];        // 0 ~ 2pi rad
@@ -112,12 +137,24 @@ class ControlMotorMode : public Mode, Robot {
     float highVel, lowVel;
     float goalAngle[2];
     float goalVel[2];
-    float volt[2]; // モータに入力する電圧
-    float angleKp[2], angleKd[2], velKp[2], velKd[2];
-    float angleMaster, angleSlave;
+    float goalVelPrev[2];
+    int32_t volt[2]; // モータに入力する電圧のpwm
+    // float angleMaster, angleSlave; // master : A, slave : B で固定するから要らないかも
+    unsigned long currentTime, cycleTime; // 累計時間と周期[ms]
+    uint8_t integralTime;
 
     uint16_t voltToDuty(float volt) {
         return volt * 65535 / 12;
+    }
+
+    // 常にAがmaster, Bがslave
+    // angleの差に応じたpwm操作できると良いね
+    void synchronizeMotors() {
+        if (angle[0] < angle[1]) { // AがBに遅れてる
+            volt[1]--;
+        } else if (angle[0] > angle[1]) { // AがBより進んでる
+            volt[1]++;
+        }
     }
 };
 

@@ -18,12 +18,6 @@ class Motor {
     void stop();
     void brake();
 
-    // :TODO: PID制御 @ryoskRFR 速度のPID制御を追加してもろて
-    void drive(float radPerSec);
-    void setPIDGain(float _p, float _i, float _d);
-    void setPIDLimit(float _limitMin, float _limitMax);
-    void resetPID();
-
   private:
     uint8_t ph;
     uint8_t en;
@@ -33,8 +27,6 @@ class Motor {
     PID pid = PID(0, 0, 0, 0);
     MultipleAS5600 *encoder;
     uint8_t encoderPort;
-
-    float velAngular; // よしなにして，つかわなくてもいいよ
 };
 
 #endif
