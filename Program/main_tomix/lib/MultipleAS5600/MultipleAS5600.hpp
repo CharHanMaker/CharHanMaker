@@ -20,7 +20,7 @@ class MultipleAS5600 {
     void begin();
 
     // 角度読み取り系
-    float readRawValue(uint8_t _sensorNumber);      // 12bit
+    uint16_t readRawValue(uint8_t _sensorNumber);   // 12bit
     uint16_t read12BitValue(uint8_t _sensorNumber); // 12bit
     float readDegree(uint8_t _sensorNumber);        // degree
     float readRadian(uint8_t _sensorNumber);        // radian

@@ -18,7 +18,7 @@ void MultipleAS5600::begin() {
     }
 }
 
-float MultipleAS5600::readRawValue(uint8_t _sensorNumber) {
+uint16_t MultipleAS5600::readRawValue(uint8_t _sensorNumber) {
     // program Mux to read from correct port(0-7)
     if (_sensorNumber > 7) return VALUE_ERROR;
 
@@ -49,7 +49,9 @@ float MultipleAS5600::readRawValue(uint8_t _sensorNumber) {
 
 uint16_t MultipleAS5600::read12BitValue(uint8_t _sensorNumber) {
     if (_sensorNumber > 7) _sensorNumber = 7;
-    int16_t value = valueZero[_sensorNumber] - readRawValue(_sensorNumber);
+    int16_t raw = readRawValue(_sensorNumber);
+    if (raw == VALUE_ERROR) return VALUE_ERROR;
+    int16_t value = valueZero[_sensorNumber] - raw;
     // value = (isCW[_sensorNumber]) ? value : -value;
     while (value < 0)
         value += 4096;
@@ -68,11 +70,13 @@ uint16_t MultipleAS5600::read12BitValue(uint8_t _sensorNumber) {
 }
 
 float MultipleAS5600::readDegree(uint8_t _sensorNumber) { // returns [deg]
-    return read12BitValue(_sensorNumber) * BIT_12_TO_DEGREE;
+    uint16_t value = read12BitValue(_sensorNumber);
+    return value != VALUE_ERROR ? float(value) * BIT_12_TO_DEGREE : VALUE_ERROR;
 }
 
 float MultipleAS5600::readRadian(uint8_t _sensorNumber) { // returns [rad]
-    return read12BitValue(_sensorNumber) * BIT_12_TO_RADIAN;
+    uint16_t value = read12BitValue(_sensorNumber);
+    return value != VALUE_ERROR ? float(value) * BIT_12_TO_RADIAN : VALUE_ERROR;
 }
 
 float MultipleAS5600::getVelocity(uint8_t _sensorNumber) { // returns [rad/s]
