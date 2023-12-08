@@ -63,10 +63,37 @@ class SensorTestMode : public Mode, Robot {
                 Serial.printf("Vel0:%.2f\tVel1:%.2f\t", AbsEncorders.getVelocity(0), AbsEncorders.getVelocity(1));
             }
             Serial.println();
-        } else if (checkType <= '7' && checkType <= '8') {
+            delay(10);
+        } else if (checkType >= '7' && checkType <= '8') {
             // EEPROMの設定
-            Serial.println("EEPROM");
+            if (checkType == '7') {
+                Serial.println("Read from EEPROM");
+                uint16_t rawValue0, rawValue1;
+                readEncoderZeroPos(rawValue0, rawValue1);
+                Serial.printf("ZeroDeg0:%.2f, ZeroDeg1:%.2f\n", float(rawValue0 * BIT_12_TO_DEGREE), float(rawValue1 * BIT_12_TO_DEGREE));
+                AbsEncorders.setZero(0, rawValue0);
+                AbsEncorders.setZero(1, rawValue1);
+                login2();
+            } else if (checkType <= '8') {
+                for (size_t i = 0; i < 10; i++) { // 空読み
+                    AbsEncorders.readRawValue(0);
+                    AbsEncorders.readRawValue(1);
+                }
+                // 平均取得
+                uint32_t rawValue[2] = {0};
+                for (size_t i = 0; i < 20; i++) {
+                    rawValue[0] += AbsEncorders.readRawValue(0);
+                    rawValue[1] += AbsEncorders.readRawValue(1);
+                    delay(5);
+                }
+                rawValue[0] /= 20;
+                rawValue[1] /= 20;
+                Serial.println("Write to EEPROM");
+                Serial.printf("ZeroDeg0:%.2f, ZeroDeg1:%.2f\n", float(rawValue[0] * BIT_12_TO_DEGREE), float(rawValue[1] * BIT_12_TO_DEGREE));
+                writeEncoderZeroPos(uint16_t(rawValue[0]), uint16_t(rawValue[1]));
+            }
             delay(1000);
+            checkType = '-';
         } else {
             Serial.println("Send 'T' to reset");
             delay(1000);

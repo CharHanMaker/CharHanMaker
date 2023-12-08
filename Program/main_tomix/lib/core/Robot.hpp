@@ -7,6 +7,7 @@
 #include "Motor.hpp"
 #include <Wire.h>
 #include <timer.h>
+#include <EEPROM.h>
 #include "LPF.hpp"
 #include "MultipleAS5600.hpp"
 #include <MotorPID.hpp>
@@ -17,6 +18,11 @@ typedef struct {
     float angulerVelLeft;  //[rad/s]
     float angulerVelRight; //[rad/s]
 } sensors_t;
+
+typedef union {
+    uint16_t dataInt; // main value
+    uint8_t bytes[2]; // byte array
+} byteSplitterInt16;
 
 class Robot {
   public:
@@ -31,6 +37,8 @@ class Robot {
         // シリアル通信の設定
         Serial.begin(115200);
 
+        // EEPROM
+        EEPROM.begin(512);
         // I2Cの設定
         Wire.setClock(400000); // I2C の通信速度 : 400k Hz
         Wire.begin();
@@ -99,6 +107,39 @@ void logout1() {
     tone(CorePins::Buzzer, 4000);
     delay(50);
     noTone(CorePins::Buzzer);
+}
+
+void readEncoderZeroPos(uint16_t &rawValue0, uint16_t &rawValue1) { // EEPROM
+    byteSplitterInt16 dataFrame[2];
+    for (size_t address = 0; address < 2; address++) {
+        dataFrame[address].bytes[0] = EEPROM.read(address * 2);     // LSB
+        dataFrame[address].bytes[1] = EEPROM.read(address * 2 + 1); // MSB
+        Serial.printf("%d: %d ,%d → %d\n", address, dataFrame[address].bytes[0], dataFrame[address].bytes[1], dataFrame[address].dataInt);
+    }
+    rawValue0 = dataFrame[0].dataInt;
+    rawValue1 = dataFrame[1].dataInt;
+    delay(2000);
+}
+
+void writeEncoderZeroPos(uint16_t rawValue0, uint16_t rawValue1) { // EEPROM
+    byteSplitterInt16 dataFrame[2];
+    dataFrame[0].dataInt = rawValue0;
+    dataFrame[1].dataInt = rawValue1;
+    for (size_t address = 0; address < 2; address++) {
+        EEPROM.write(address * 2, dataFrame[address].bytes[0]); // LSB
+        delay(200);
+        EEPROM.write(address * 2 + 1, dataFrame[address].bytes[1]); // MSB
+        delay(200);
+        Serial.printf("%d: %d → %d ,%d \n", address, dataFrame[address].dataInt, dataFrame[address].bytes[0], dataFrame[address].bytes[1]);
+        if (EEPROM.commit()) {
+            Serial.println("EEPROM successfully committed");
+            login2();
+        } else {
+            Serial.println("ERROR! EEPROM commit failed");
+            logout1();
+        }
+    }
+    delay(2000);
 }
 
 void setup1() {
