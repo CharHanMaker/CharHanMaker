@@ -39,10 +39,10 @@ class ControlMotorMode : public Mode, Robot {
 
         continuousTime = 0; // ms
         cycleTime = 400;    // 0.4s
+        integralTime = 0;
 
         interval.reset();
         continuousTimer.reset(); // [ms]
-        integralTime = 0;
     }
 
     void loop() {
@@ -82,31 +82,22 @@ class ControlMotorMode : public Mode, Robot {
 
             // 台形積分して目標角を出す overflow対策どうしよう
             for (uint8_t i = 0; i < 2; i++) {
-                goalAngle[i] = (goalVelPrev[i] + goalVel[i]) * integralTime / 2; // uint8_tを割ってるので微誤差発生
+                goalAngle[i] = (goalVelPrev[i] + goalVel[i]) * integralTime / 2; // uint8_tを割ってるので微誤差発生注意
             }
 
             // ここに制御則とか書く
             if (vel[0] < lowVel || vel[1] < lowVel) { // 目標の低角速度まで加速
                 for (uint8_t i = 0; i < 2; i++)
                     volt[i]++;
-
-                synchronizeMotors(); // 申し訳程度の同期
-                motorA.runOpenloop(volt[0], true);
-                motorB.runOpenloop(volt[1], true);
-            } else { // 運転できるようになってからの制御
+            } else { // 実機が立ち上がってからの制御
                 // 目標角速度と目標角をコントローラに入れてPID制御
                 volt[0] = motorA.velControl(goalVel[0]) + motorA.angleControl(goalAngle[0]);
                 volt[1] = motorB.velControl(goalVel[1]) + motorB.angleControl(goalAngle[1]);
-
-                synchronizeMotors(); // 申し訳程度の同期
-                motorA.runOpenloop(volt[0], true);
-                motorB.runOpenloop(volt[1], true);
             }
-
-            // input voltage to motor (0~12V)
-            // 入力電圧のsaturationを書く
-            analogWrite(CorePins::MotorENA, voltToDuty(12)); // ここ12の値を変更
-            analogWrite(CorePins::MotorENB, voltToDuty(12));
+            // モータへ出力
+            synchronizeMotors(); // 申し訳程度の同期
+            motorA.runOpenloop(volt[0], true);
+            motorB.runOpenloop(volt[1], true);
         }
     }
 
