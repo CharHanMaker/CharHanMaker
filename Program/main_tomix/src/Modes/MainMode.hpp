@@ -18,6 +18,7 @@ class MainMode : public Mode, Robot {
 
     void before() {
         i = 0;
+        login1();
     }
 
     void loop() {

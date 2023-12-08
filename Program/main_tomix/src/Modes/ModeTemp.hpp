@@ -11,6 +11,7 @@ class TempMode : public Mode, Robot {
 
     void before() {
         Serial.printf("loop %s\n", getModeName());
+        logout1();
     }
 
     void loop() {
