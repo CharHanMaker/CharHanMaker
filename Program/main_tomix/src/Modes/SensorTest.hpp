@@ -77,10 +77,17 @@ class SensorTestMode : public Mode, Robot {
                 login2();
             } else if (checkType <= '8') {
                 // EEPROMにエンコーダの初期位置を書き込んで保存する
+                bool isErr = false;
                 for (size_t i = 0; i < 10; i++) { // 空読み
-                    AbsEncorders.readRawValue(0);
-                    AbsEncorders.readRawValue(1);
+                    for (size_t j = 0; j < 2; j++) {
+                        if (AbsEncorders.readRawValue(j) == VALUE_ERROR) {
+                            Serial.printf("%d:Encoder[%d] has Error!!!!\n", i, j);
+                            logout1(); // アラーム
+                            isErr = true;
+                        }
+                    }
                 }
+                if (isErr) return;
                 // エンコーダの値の平均取得
                 uint32_t rawValue[2] = {0};
                 for (size_t i = 0; i < 20; i++) {
@@ -94,7 +101,6 @@ class SensorTestMode : public Mode, Robot {
                 Serial.printf("ZeroDeg0:%.2f, ZeroDeg1:%.2f\n", float(rawValue[0] * BIT_12_TO_DEGREE), float(rawValue[1] * BIT_12_TO_DEGREE));
                 writeEncoderZeroPos(uint16_t(rawValue[0]), uint16_t(rawValue[1])); // EEPROM書き込み
             }
-            delay(1000);
             checkType = '-';
         } else {
             Serial.println("Send 'T' to reset");
