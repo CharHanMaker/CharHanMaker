@@ -63,10 +63,45 @@ class SensorTestMode : public Mode, Robot {
                 Serial.printf("Vel0:%.2f\tVel1:%.2f\t", AbsEncorders.getVelocity(0), AbsEncorders.getVelocity(1));
             }
             Serial.println();
-        } else if (checkType <= '7' && checkType <= '8') {
-            // EEPROMの設定
-            Serial.println("EEPROM");
-            delay(1000);
+            delay(10);
+        } else if (checkType >= '7' && checkType <= '8') {
+            // EEPROMの関連
+            if (checkType == '7') {
+                // EEPROMから保存されているエンコーダの初期位置を読み出す
+                Serial.println("Read from EEPROM");
+                uint16_t rawValue0, rawValue1;
+                readEncoderZeroPos(rawValue0, rawValue1);
+                Serial.printf("ZeroDeg0:%.2f, ZeroDeg1:%.2f\n", float(rawValue0 * BIT_12_TO_DEGREE), float(rawValue1 * BIT_12_TO_DEGREE));
+                AbsEncorders.setZero(0, rawValue0);
+                AbsEncorders.setZero(1, rawValue1);
+                login2();
+            } else if (checkType <= '8') {
+                // EEPROMにエンコーダの初期位置を書き込んで保存する
+                bool isErr = false;
+                for (size_t i = 0; i < 10; i++) { // 空読み
+                    for (size_t j = 0; j < 2; j++) {
+                        if (AbsEncorders.readRawValue(j) == VALUE_ERROR) {
+                            Serial.printf("%d:Encoder[%d] has Error!!!!\n", i, j);
+                            logout1(); // アラーム
+                            isErr = true;
+                        }
+                    }
+                }
+                if (isErr) return;
+                // エンコーダの値の平均取得
+                uint32_t rawValue[2] = {0};
+                for (size_t i = 0; i < 20; i++) {
+                    rawValue[0] += AbsEncorders.readRawValue(0);
+                    rawValue[1] += AbsEncorders.readRawValue(1);
+                    delay(5);
+                }
+                rawValue[0] /= 20;
+                rawValue[1] /= 20;
+                Serial.println("Write to EEPROM");
+                Serial.printf("ZeroDeg0:%.2f, ZeroDeg1:%.2f\n", float(rawValue[0] * BIT_12_TO_DEGREE), float(rawValue[1] * BIT_12_TO_DEGREE));
+                writeEncoderZeroPos(uint16_t(rawValue[0]), uint16_t(rawValue[1])); // EEPROM書き込み
+            }
+            checkType = '-';
         } else {
             Serial.println("Send 'T' to reset");
             delay(1000);
