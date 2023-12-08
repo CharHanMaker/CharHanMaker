@@ -46,12 +46,6 @@ class ControlMotorMode : public Mode, Robot {
     }
 
     void loop() {
-        Serial.printf("loop:%d\n waiting for send 'M' ", getModeLetter());
-
-        // initialize
-        analogWrite(CorePins::MotorENA, 0);
-        analogWrite(CorePins::MotorENB, 0);
-
         // 5ms ごとにセンサの値を読み，角速度を計算し，シリアルモニタに出力する
         // 5ms ごとにモータに入力を与える
         if (interval.read_us() >= Ts * 1000000) {
@@ -89,7 +83,7 @@ class ControlMotorMode : public Mode, Robot {
                 }
             }
 
-            // 台形積分して目標角を出す
+            // 台形積分して目標角を出す overflow対策どうしよう
             for (uint8_t i = 0; i < 2; i++) {
                 goalAngle[i] = (goalVelPrev[i] + goalVel[i]) * integralTime / 2; // uint8_tを割ってるので微誤差発生
             }
@@ -99,17 +93,17 @@ class ControlMotorMode : public Mode, Robot {
                 for (uint8_t i = 0; i < 2; i++)
                     volt[i]++;
 
-                synchronizeMotors();
-                motorA.runOpenloop(volt[0]);
-                motorB.runOpenloop(volt[1]);
+                synchronizeMotors(); // 申し訳程度の同期
+                motorA.runOpenloop(volt[0], true);
+                motorB.runOpenloop(volt[1], true);
             } else { // 運転できるようになってからの制御
                 // 目標角速度と目標角をコントローラに入れてPID制御
                 volt[0] = motorA.velControl(goalVel[0]) + motorA.angleControl(goalAngle[0]);
                 volt[1] = motorB.velControl(goalVel[1]) + motorB.angleControl(goalAngle[1]);
 
                 synchronizeMotors(); // 申し訳程度の同期
-                motorA.runOpenloop(volt[0]);
-                motorB.runOpenloop(volt[1]);
+                motorA.runOpenloop(volt[0], true);
+                motorB.runOpenloop(volt[1], true);
             }
 
             // input voltage to motor (0~12V)
@@ -117,12 +111,6 @@ class ControlMotorMode : public Mode, Robot {
             analogWrite(CorePins::MotorENA, voltToDuty(12)); // ここ12の値を変更
             analogWrite(CorePins::MotorENB, voltToDuty(12));
         }
-
-        // end process
-        analogWrite(CorePins::MotorENA, 0);
-        analogWrite(CorePins::MotorENB, 0);
-        Serial.printf("end...Send T to continue\n");
-        delay(10000);
     }
 
     void after() {
