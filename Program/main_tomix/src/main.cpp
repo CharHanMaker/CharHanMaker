@@ -2,14 +2,16 @@
 #include <./Modes/MainMode.hpp>
 #include <./Modes/ModeTemp.hpp>
 #include <./Modes/SensorTest.hpp>
+#include <./Modes/MotorVelTest.hpp>
 
-#define MODE_QTY 3
+#define MODE_QTY 4
 
 MainMode mainMode('M', "MainMode");
 TempMode tempMode('T', "TempMode");
 SensorTestMode sensorTestMode('S', "SensorTest");
+MotorVelTest motorVelTest('V', "MotorVelTest");
 
-Mode *modes[MODE_QTY] = {&mainMode, &tempMode, &sensorTestMode};
+Mode *modes[MODE_QTY] = {&mainMode, &tempMode, &sensorTestMode, &motorVelTest};
 Mode *currentMode = &tempMode;
 
 void setup() {
