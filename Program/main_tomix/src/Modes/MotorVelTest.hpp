@@ -33,18 +33,40 @@ class MotorVelTest : public Mode, Robot {
         previousVel = 0;
 
         Serial.setTimeout(5);
+        isLoop = true;
     }
 
     void loop() {
-        if (Serial.available() > 0) {
-            targetVel = Serial.parseFloat();
+        while (isLoop) {
+            // 文字列受信
+            if (Serial.available() > 0) {
+                String str = Serial.readStringUntil('\n');
+                if (str == "stop") {
+                    isLoop = false;
+                    motorA.stop();
+                    motorB.stop();
+                    logout1();
+                } else if (str.startsWith("set")) {
+                    str.remove(0, 3); // "set"の3文字部分を削除
+                    targetVel = str.toFloat();
+                    velPID.reset();
+                }
+            } else {
+                AbsEncorders.read12BitValue(0);
+                AbsEncorders.read12BitValue(1);
+                currentVel = AbsEncorders.getVelocity(0); //[rad/s]
+                error = -(targetVel - currentVel);
+                velPID.appendError(error);
+                velPID.compute();
+                output = velPID.getPID();
+                motorA.runOpenloop(voltToDuty(output), true);
+                Serial.printf("targetVel:%.2f, currentVel:%.2f, error:%.2f, output:%.2f, pwm:%d\n", targetVel, currentVel, error, output, voltToDuty(output));
+                delay(4);
+            }
         }
-        AbsEncorders.read12BitValue(0);
-        currentVel = AbsEncorders.getVelocity(0); //[rad/s]
-        velPID.appendError(targetVel - currentVel);
-        velPID.compute();
-        output = velPID.getPID();
-        motorA.runOpenloop(voltToDuty(output), 0);
+
+        Serial.println("Send 'T' to reset");
+        delay(1000);
     }
 
     void after() {
@@ -54,19 +76,22 @@ class MotorVelTest : public Mode, Robot {
     }
 
   private:
-    const float Kp = 0.1;
-    const float Ki = 0.0;
+    const float Kp = 3.0;
+    const float Ki = 0.5;
     const float Kd = 0.0;
     const float dt = 0.005; // 5ms
     float targetVel;
     float currentVel;
     float previousVel;
+    float error;
     float output;
     PID velPID = PID(Kp, Ki, Kd, dt);
 
+    bool isLoop = true;
+
     // functions
-    uint16_t voltToDuty(float volt) {
-        return volt * 65535 / 12;
+    int32_t voltToDuty(float volt) {
+        return int32_t(volt * 65535 / 12);
     }
 };
 
