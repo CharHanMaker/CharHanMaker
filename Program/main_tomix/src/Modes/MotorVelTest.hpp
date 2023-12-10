@@ -25,6 +25,8 @@ class MotorVelTest : public Mode, Robot {
         /*　--------------------EEPROMからエンコーダの初期角度の読み込み-------------------- */
         login1();
 
+        motorA.setSaturation(65535, -65535);
+
         velPID.setLimit(-12, 12);
         velPID.reset();
 
@@ -40,28 +42,28 @@ class MotorVelTest : public Mode, Robot {
         while (isLoop) {
             // 文字列受信
             if (Serial.available() > 0) {
-                String str = Serial.readStringUntil('\n');
-                if (str == "stop") {
-                    isLoop = false;
+                String str = Serial.readStringUntil('\n'); // 改行までの文字列を受信
+                if (str == "stop") {                       // stopと入力されたらモータを止める
+                    isLoop = false;                        // whileループを抜ける
                     motorA.stop();
                     motorB.stop();
                     logout1();
                 } else if (str.startsWith("set")) {
                     str.remove(0, 3); // "set"の3文字部分を削除
                     targetVel = str.toFloat();
-                    velPID.reset();
+                    velPID.resetIntegral();
                 }
             } else {
                 AbsEncorders.read12BitValue(0);
                 AbsEncorders.read12BitValue(1);
                 currentVel = AbsEncorders.getVelocity(0); //[rad/s]
-                error = -(targetVel - currentVel);
+                error = -(targetVel - currentVel);        // これはmotorA.setCW()でなくせるはず
                 velPID.appendError(error);
                 velPID.compute();
                 output = velPID.getPID();
                 motorA.runOpenloop(voltToDuty(output), true);
-                Serial.printf("targetVel:%.2f, currentVel:%.2f, error:%.2f, output:%.2f, pwm:%d\n", targetVel, currentVel, error, output, voltToDuty(output));
-                delay(4);
+                Serial.printf("targetVel:%.2f, currentVel:%.2f, error:%.2f, output:%.2f\n", targetVel, currentVel, error, output);
+                // delay(3);
             }
         }
 
@@ -76,10 +78,10 @@ class MotorVelTest : public Mode, Robot {
     }
 
   private:
-    const float Kp = 3.0;
-    const float Ki = 0.5;
+    const float Kp = 3.5;
+    const float Ki = 5.0;
     const float Kd = 0.0;
-    const float dt = 0.005; // 5ms
+    const float dt = 0.003; // 5ms
     float targetVel;
     float currentVel;
     float previousVel;
