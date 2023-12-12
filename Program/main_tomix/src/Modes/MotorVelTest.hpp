@@ -78,8 +78,8 @@ class MotorVelTest : public Mode, Robot {
     }
 
   private:
-    const float Kp = 3.5;
-    const float Ki = 5.0;
+    const float Kp = 2.0;
+    const float Ki = 3.0;
     const float Kd = 0.0;
     const float dt = 0.003; // 5ms
     float targetVel;
