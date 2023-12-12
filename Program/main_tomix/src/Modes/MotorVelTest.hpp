@@ -36,6 +36,12 @@ class MotorVelTest : public Mode, Robot {
 
         Serial.setTimeout(5);
         isLoop = true;
+        AbsEncorders.readDegree(0);
+        AbsEncorders.readDegree(1);
+        while (abs(AbsEncorders.readDegree(0)) > 0.1) {
+            motorA.runOpenloop(voltToDuty(1), true);
+        }
+        Serial.printf("ZeroDeg0:%.2f\n", float(AbsEncorders.readDegree(0)));
     }
 
     void loop() {
@@ -64,6 +70,7 @@ class MotorVelTest : public Mode, Robot {
                 motorA.runOpenloop(voltToDuty(output), true);
                 Serial.printf("targetVel:%.2f, currentVel:%.2f, error:%.2f, output:%.2f\n", targetVel, currentVel, error, output);
                 // delay(3);
+                // if (abs(error) < 0.1) velPID.reset();
             }
         }
 
@@ -78,8 +85,8 @@ class MotorVelTest : public Mode, Robot {
     }
 
   private:
-    const float Kp = 2.0;
-    const float Ki = 3.0;
+    const float Kp = 0.0;
+    const float Ki = 1.0;
     const float Kd = 0.0;
     const float dt = 0.003; // 5ms
     float targetVel;
