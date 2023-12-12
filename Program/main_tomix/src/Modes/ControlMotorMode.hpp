@@ -17,15 +17,16 @@ class ControlMotorMode : public Mode, Robot {
     void before() {
         Serial.printf("before %s\n", getModeName());
 
-        for (size_t i = 0; i < 50; i++) {
+        for (size_t i = 0; i < 50; i++) {          // これ要る？
             angle[0] = AbsEncorders.readRadian(0); // 0番目のエンコーダの角度を取得
             angle[1] = AbsEncorders.readRadian(1); // 1番目のエンコーダの角度を取得
         }
 
         for (uint8_t i = 0; i < 2; i++) {
-            startAngle[i] = angle[i];
-            currentAngle[i] = 0;
-            roundCnt[i] = 0;
+            initialAngle[i] = AbsEncorders.setZero(i);
+            continuousAngle[i] = 0;
+            AbsEncorders.resetRotationCount(i);
+            rotationCnt[i] = AbsEncorders.getRotationCount(i);
             velPrev[i] = 0;
 
             goalAngle[i] = 0;
@@ -37,12 +38,12 @@ class ControlMotorMode : public Mode, Robot {
         highVel = HALF_PI; // rad/s
         lowVel = HALF_PI / 2;
 
-        currentTime = 0; // ms
-        cycleTime = 400; // 0.4s
+        continuousTime = 0; // ms
+        cycleTime = 400;    // 0.4s
+        integralTime = 0;
 
         interval.reset();
-        currentTimer.reset(); // [ms]
-        integralTime = 0;
+        continuousTimer.reset(); // [ms]
     }
 
     void loop() {
@@ -55,23 +56,20 @@ class ControlMotorMode : public Mode, Robot {
             for (uint8_t i = 0; i < 2; i++) {
                 velPrev[i] = vel[i];
                 angle[i] = AbsEncorders.readRadian(i); // i番目のエンコーダの弧度を取得
-                vel[i] = -AbsEncorders.getVelocity(i); // i番目のエンコーダの角速度を取得[rad/s]
+                vel[i] = -AbsEncorders.getVelocity(i); // i番目のエンコーダの角速度を取得[rad/s] これのマイナスどうする？
                 acc[i] = (vel[i] - velPrev[i]) / Ts;
 
-                // モータが１周回転したことを確認 velPrevは間違い
-                // if (0 <= angle[i] && angle[i] < PI && PI < velPrev[i] && velPrev[i] < TWO_PI)
-                //     roundCnt[i]++;
-
-                // currentAngle[i] = (float)roundCnt[i] * TWO_PI + angle[i] - startAngle[i];
+                rotationCnt[i] = AbsEncorders.getRotationCount(i);                          // overflow対策どうする 片方3000回転でもう片方が30回転とかあり得る
+                continuousAngle[i] = AbsEncorders.getContinuousRadian(i) - initialAngle[i]; // rotationCntでoverflowを対処するので、ここでは考慮しなくて良い
             }
 
             // 目標角速度を決める、
-            integralTime = currentTimer.read_ms(); // uint8_t と unsigned long だからerrorが生じるかも
-            currentTime += integralTime;
-            if (currentTime > 100 * cycleTime) currentTime -= 99 * cycleTime;
-            currentTimer.reset();
+            integralTime = continuousTimer.read_ms(); // uint8_t と unsigned long だからerrorが生じるかも
+            continuousTime += integralTime;
+            if (continuousTime > 100 * cycleTime) continuousTime -= 99 * cycleTime;
+            continuousTimer.reset();
 
-            if (currentTime % cycleTime <= 300) { // t < T*3/4
+            if (continuousTime % cycleTime <= 300) { // t < T*3/4
                 for (uint8_t i = 0; i < 2; i++) {
                     goalVelPrev[i] = goalVel[i]; // 更新
                     goalVel[i] = lowVel;
@@ -85,31 +83,22 @@ class ControlMotorMode : public Mode, Robot {
 
             // 台形積分して目標角を出す overflow対策どうしよう
             for (uint8_t i = 0; i < 2; i++) {
-                goalAngle[i] = (goalVelPrev[i] + goalVel[i]) * integralTime / 2; // uint8_tを割ってるので微誤差発生
+                goalAngle[i] = (goalVelPrev[i] + goalVel[i]) * integralTime / 2; // uint8_tを割ってるので微誤差発生注意
             }
 
             // ここに制御則とか書く
             if (vel[0] < lowVel || vel[1] < lowVel) { // 目標の低角速度まで加速
                 for (uint8_t i = 0; i < 2; i++)
-                    volt[i]++;
-
-                synchronizeMotors(); // 申し訳程度の同期
-                motorA.runOpenloop(volt[0], true);
-                motorB.runOpenloop(volt[1], true);
-            } else { // 運転できるようになってからの制御
+                    volt[i] += 15;
+            } else { // 実機が立ち上がってからの制御
                 // 目標角速度と目標角をコントローラに入れてPID制御
                 volt[0] = motorA.velControl(goalVel[0]) + motorA.angleControl(goalAngle[0]);
                 volt[1] = motorB.velControl(goalVel[1]) + motorB.angleControl(goalAngle[1]);
-
-                synchronizeMotors(); // 申し訳程度の同期
-                motorA.runOpenloop(volt[0], true);
-                motorB.runOpenloop(volt[1], true);
             }
-
-            // input voltage to motor (0~12V)
-            // 入力電圧のsaturationを書く
-            analogWrite(CorePins::MotorENA, voltToDuty(12)); // ここ12の値を変更
-            analogWrite(CorePins::MotorENB, voltToDuty(12));
+            // モータへ出力
+            synchronizeMotors(); // 申し訳程度の同期
+            motorA.runOpenloop(volt[0], true);
+            motorB.runOpenloop(volt[1], true);
         }
     }
 
@@ -122,16 +111,16 @@ class ControlMotorMode : public Mode, Robot {
   private:
     timer interval;
     const float Ts = 0.005; // 周期[s]
-    timer currentTimer;     // [ms]
+    timer continuousTimer;  // [ms]
 
     // エンコーダ系
-    float angle[2];        // 0 ~ 2pi rad
-    float startAngle[2];   // 0 ~ 2pi rad
-    float currentAngle[2]; // 0 ~ float_max rad : 累積弧度
-    float vel[2];          // rad/s
-    float acc[2];          // rad/s/s
+    float angle[2];           // 0 ~ 2pi rad
+    float initialAngle[2];    // 0 ~ 2pi rad
+    float continuousAngle[2]; // 0 ~ float_max rad : 累計弧度
+    float vel[2];             // rad/s
+    float acc[2];             // rad/s/s
     float velPrev[2];
-    uint8_t roundCnt[2]; // 何周したかをカウント
+    int16_t rotationCnt[2]; // 何周したかをカウント
 
     // 制御系
     float highVel, lowVel;
@@ -140,20 +129,20 @@ class ControlMotorMode : public Mode, Robot {
     float goalVelPrev[2];
     int32_t volt[2]; // モータに入力する電圧のpwm
     // float angleMaster, angleSlave; // master : A, slave : B で固定するから要らないかも
-    unsigned long currentTime, cycleTime; // 累計時間と周期[ms]
+    unsigned long continuousTime, cycleTime; // 累計時間と周期[ms]
     uint8_t integralTime;
 
-    uint16_t voltToDuty(float volt) {
-        return volt * 65535 / 12;
-    }
+    // uint16_t voltToDuty(float volt) { // 要らない？
+    //     return volt * 65535 / 12;
+    // }
 
     // 常にAがmaster, Bがslave
     // angleの差に応じたpwm操作できると良いね
     void synchronizeMotors() {
         if (angle[0] < angle[1]) { // AがBに遅れてる
-            volt[1]--;
+            volt[1] -= 15;
         } else if (angle[0] > angle[1]) { // AがBより進んでる
-            volt[1]++;
+            volt[1] += 15;
         }
     }
 };
