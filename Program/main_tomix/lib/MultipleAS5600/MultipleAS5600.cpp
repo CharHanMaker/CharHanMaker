@@ -59,9 +59,9 @@ uint16_t MultipleAS5600::read12BitValue(uint8_t _sensorNumber) {
     valueArray[_sensorNumber] = value;
     // 回転数カウント
     if (valueArray[_sensorNumber] - valuePrev[_sensorNumber] > 2048) {
-        count[_sensorNumber] = count[_sensorNumber] + (isCW[sensorNumber] ? 1 : -1);
-    } else if (valueArray[_sensorNumber] - valuePrev[_sensorNumber] < -2048) {
         count[_sensorNumber] = count[_sensorNumber] - (isCW[sensorNumber] ? 1 : -1);
+    } else if (valueArray[_sensorNumber] - valuePrev[_sensorNumber] < -2048) {
+        count[_sensorNumber] = count[_sensorNumber] + (isCW[sensorNumber] ? 1 : -1);
     }
 
     dt[_sensorNumber] = (float)velTimer[_sensorNumber].read_us() / 1000000;

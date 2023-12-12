@@ -36,6 +36,11 @@ class SensorTestMode : public Mode, Robot {
                 logout1();
             }
         } while (!(checkType >= '0' && checkType <= '8'));
+        uint16_t rawValue0, rawValue1;
+        readEncoderZeroPos(rawValue0, rawValue1);
+        Serial.printf("ZeroDeg0:%.2f, ZeroDeg1:%.2f\n", float(rawValue0 * BIT_12_TO_DEGREE), float(rawValue1 * BIT_12_TO_DEGREE));
+        AbsEncorders.setZero(0, rawValue0);
+        AbsEncorders.setZero(1, rawValue1);
         login1();
     }
 
