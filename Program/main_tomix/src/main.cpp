@@ -3,22 +3,25 @@
 #include <./Modes/ModeTemp.hpp>
 #include <./Modes/SensorTest.hpp>
 #include <./Modes/MotorVelTest.hpp>
+#include <./Modes/ControlMotorMode.hpp>
+#include <./Modes/SystemIdentification.hpp>
 
-#define MODE_QTY 5
+#define MODE_QTY 6
 
 MainMode mainMode('M', "MainMode");
 TempMode tempMode('T', "TempMode");
 SensorTestMode sensorTestMode('S', "SensorTest");
 MotorVelTest motorVelTest('V', "MotorVelTest");
 ControlMotorMode controlMode('C', "ControlMotorMode");
+SystemIdentificationMode systemidentificationMode('I', "システム同定");
 
-Mode *modes[MODE_QTY] = {&mainMode, &tempMode, &sensorTestMode, &motorVelTest, &controlMode};
+Mode *modes[MODE_QTY] = {&mainMode, &tempMode, &sensorTestMode, &motorVelTest, &controlMode, &systemidentificationMode};
 Mode *currentMode = &tempMode;
 
 void setup() {
-    mainMode.init();
-    tempMode.init();
-    controlMode.init();
+    for (size_t i = 0; i < MODE_QTY; i++) {
+        modes[i]->init();
+    }
 }
 
 void loop() {
