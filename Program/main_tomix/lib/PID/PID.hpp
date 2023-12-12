@@ -28,6 +28,7 @@ class PID {
     void setLimit(float _limitMin, float _limitMax);
     void setGain(float _p, float _i, float _d);
     void reset();
+    void resetIntegral();
     void appendError(float _error);
     void compute();
     float getPID();

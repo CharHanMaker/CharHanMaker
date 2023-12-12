@@ -39,6 +39,10 @@ void PID::reset() {
     lastError = 0;
 }
 
+void PID::resetIntegral() {
+    integral = 0;
+}
+
 void PID::compute() {
     if (t.read_us() >= dt * 1000000) {
         t.reset();
