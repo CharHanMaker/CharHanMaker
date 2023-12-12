@@ -92,8 +92,8 @@ class ControlMotorMode : public Mode, Robot {
                     volt[i] += 15;
             } else { // 実機が立ち上がってからの制御
                 // 目標角速度と目標角をコントローラに入れてPID制御
-                volt[0] = motorA.velControl(goalVel[0]) + motorA.angleControl(goalAngle[0]);
-                volt[1] = motorB.velControl(goalVel[1]) + motorB.angleControl(goalAngle[1]);
+                volt[0] = motorA.velControl(goalVel[0]); // + motorA.angleControl(goalAngle[0]);
+                volt[1] = motorB.velControl(goalVel[1]); // + motorB.angleControl(goalAngle[1]);
             }
             // モータへ出力
             synchronizeMotors(); // 申し訳程度の同期
