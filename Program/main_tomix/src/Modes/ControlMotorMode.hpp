@@ -35,8 +35,8 @@ class ControlMotorMode : public Mode, Robot {
 
             volt[i] = 0;
         }
-        highVel = HALF_PI; // rad/s
-        lowVel = HALF_PI / 2;
+        highVel = 0.523598775; // rad/s = 30[deg/s]
+        lowVel = 0.349065849;  // 20[deg/s]
 
         continuousTime = 0; // ms
         cycleTime = 400;    // 0.4s
@@ -56,8 +56,10 @@ class ControlMotorMode : public Mode, Robot {
             for (uint8_t i = 0; i < 2; i++) {
                 velPrev[i] = vel[i];
                 angle[i] = AbsEncorders.readRadian(i); // i番目のエンコーダの弧度を取得
-                vel[i] = -AbsEncorders.getVelocity(i); // i番目のエンコーダの角速度を取得[rad/s] これのマイナスどうする？
+                vel[i] = -AbsEncorders.getVelocity(i); // i番目のエンコーダの角速度を取得[rad/s]
                 acc[i] = (vel[i] - velPrev[i]) / Ts;
+
+                goalVelPrev[i] = goalVel[i];
 
                 rotationCnt[i] = AbsEncorders.getRotationCount(i);                          // overflow対策どうする 片方3000回転でもう片方が30回転とかあり得る
                 continuousAngle[i] = AbsEncorders.getContinuousRadian(i) - initialAngle[i]; // rotationCntでoverflowを対処するので、ここでは考慮しなくて良い
@@ -69,15 +71,20 @@ class ControlMotorMode : public Mode, Robot {
             if (continuousTime > 100 * cycleTime) continuousTime -= 99 * cycleTime;
             continuousTimer.reset();
 
-            if (continuousTime % cycleTime <= 300) { // t < T*3/4
-                for (uint8_t i = 0; i < 2; i++) {
-                    goalVelPrev[i] = goalVel[i]; // 更新
-                    goalVel[i] = lowVel;
-                }
-            } else {
-                for (uint8_t i = 0; i < 2; i++) {
-                    goalVelPrev[i] = goalVel[i]; // 更新
-                    goalVel[i] = highVel;
+            if (vel[0] < lowVel || vel[1] < lowVel) { // 立ち上がり中の目標角速度 2s掛けてlowVelまで立ち上がる
+
+                for (uint8_t i = 0; i < 2; i++) // ここ作業中
+                    goalVel[i] += lowVel / 400; // lowVel / 2000ms * 5ms毎
+
+            } else {                                     // 実機が立ち上がってからの目標角速度 要変更
+                if (continuousTime % cycleTime <= 300) { // t < T*3/4
+                    for (uint8_t i = 0; i < 2; i++) {
+                        goalVel[i] = lowVel;
+                    }
+                } else {
+                    for (uint8_t i = 0; i < 2; i++) {
+                        goalVel[i] = highVel;
+                    }
                 }
             }
 
@@ -86,17 +93,13 @@ class ControlMotorMode : public Mode, Robot {
                 goalAngle[i] = (goalVelPrev[i] + goalVel[i]) * integralTime / 2; // uint8_tを割ってるので微誤差発生注意
             }
 
-            // ここに制御則とか書く
-            if (vel[0] < lowVel || vel[1] < lowVel) { // 目標の低角速度まで加速
-                for (uint8_t i = 0; i < 2; i++)
-                    volt[i] += 15;
-            } else { // 実機が立ち上がってからの制御
-                // 目標角速度と目標角をコントローラに入れてPID制御
-                volt[0] = motorA.velControl(goalVel[0]); // + motorA.angleControl(goalAngle[0]);
-                volt[1] = motorB.velControl(goalVel[1]); // + motorB.angleControl(goalAngle[1]);
-            }
-            // モータへ出力
+            // 目標角速度と目標角をコントローラに入れてPID制御
+            volt[0] = motorA.velControl(goalVel[0]); // + motorA.angleControl(goalAngle[0]); // 角速度だけで制御
+            volt[1] = motorB.velControl(goalVel[1]); // + motorB.angleControl(goalAngle[1]);
+
             synchronizeMotors(); // 申し訳程度の同期
+
+            // モータへ出力
             motorA.runOpenloop(volt[0], true);
             motorB.runOpenloop(volt[1], true);
         }
