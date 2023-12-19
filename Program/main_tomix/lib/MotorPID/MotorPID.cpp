@@ -8,12 +8,20 @@ void MotorPid::setAnglePIDGain(float _p, float _i, float _d) {
     pidAngle.setGain(_p, _i, _d);
 }
 
+void MotorPid::setSynchronizePIDGain(float _p, float _i, float _d) {
+    pidSynchronize.setGain(_p, _i, _d);
+}
+
 void MotorPid::setVelPIDLimit(float _limitMin, float _limitMax) {
     pidVel.setLimit(_limitMin, _limitMax);
 }
 
 void MotorPid::setAnglePIDLimit(float _limitMin, float _limitMax) {
     pidAngle.setLimit(_limitMin, _limitMax);
+}
+
+void MotorPid::setSynchronizePIDLimit(float _limitMin, float _limitMax) {
+    pidSynchronize.setLimit(_limitMin, _limitMax);
 }
 
 void MotorPid::resetPID() {
@@ -40,4 +48,12 @@ int32_t MotorPid::angleControl(float rad) { // 目標角radが引数のPID制御
     pidAngle.appendError(error);
     pidAngle.compute();
     return out = pidAngle.getPID();
+}
+
+int32_t MotorPid::synchronizeControl(float radMaster, float radSlave) { // モータ同期のためのPID制御関数
+    error = radMaster - radSlave;
+
+    pidSynchronize.appendError(error);
+    pidSynchronize.compute();
+    return out = pidSynchronize.getPID();
 }

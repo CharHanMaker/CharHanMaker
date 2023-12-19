@@ -38,6 +38,14 @@ class ControlMotorMode : public Mode, Robot {
         highVel = 0.523598775; // rad/s = 30[deg/s]
         lowVel = 0.349065849;  // 20[deg/s]
 
+        // PID gain
+        motorA.setAnglePIDGain(0, 0, 0);
+        motorA.setVelPIDGain(0, 0, 0);
+        motorA.setSynchronizePIDGain(0, 0, 0);
+        motorB.setAnglePIDGain(0, 0, 0);
+        motorB.setVelPIDGain(0, 0, 0);
+        motorB.setSynchronizePIDGain(0, 0, 0);
+
         continuousTime = 0; // ms
         cycleTime = 400;    // 0.4s
         integralTime = 0;
@@ -77,11 +85,11 @@ class ControlMotorMode : public Mode, Robot {
                     goalVel[i] += lowVel / 400; // lowVel / 2000ms * 5ms毎
 
             } else {                                     // 実機が立ち上がってからの目標角速度 要変更
-                if (continuousTime % cycleTime <= 300) { // t < T*3/4
+                if (continuousTime % cycleTime <= 300) { // t <= T*3/4
                     for (uint8_t i = 0; i < 2; i++) {
                         goalVel[i] = lowVel;
                     }
-                } else {
+                } else { // t > T*3/4
                     for (uint8_t i = 0; i < 2; i++) {
                         goalVel[i] = highVel;
                     }
@@ -94,14 +102,20 @@ class ControlMotorMode : public Mode, Robot {
             }
 
             // 目標角速度と目標角をコントローラに入れてPID制御
-            volt[0] = motorA.velControl(goalVel[0]); // + motorA.angleControl(goalAngle[0]); // 角速度だけで制御
-            volt[1] = motorB.velControl(goalVel[1]); // + motorB.angleControl(goalAngle[1]);
+            volt[0] = motorA.velControl(goalVel[0]) + motorA.angleControl(goalAngle[0]); // 角速度だけで制御
+            volt[1] = motorB.velControl(goalVel[1]) + motorB.angleControl(goalAngle[1]);
 
-            synchronizeMotors(); // 申し訳程度の同期
+            synchronizeMotors(); // PIDで同期
+            for (uint8_t i = 0; i < 2; i++) {
+                constrain(volt[i], -12, 12); // -12 ~ 12 V に saturation
+            }
 
             // モータへ出力
-            motorA.runOpenloop(volt[0], true);
-            motorB.runOpenloop(volt[1], true);
+            motorA.runOpenloop(voltToDuty(volt[0]), true);
+            motorB.runOpenloop(voltToDuty(volt[1]), true);
+
+            // 結果を出力したい
+            // Serial.println
         }
     }
 
@@ -135,17 +149,23 @@ class ControlMotorMode : public Mode, Robot {
     unsigned long continuousTime, cycleTime; // 累計時間と周期[ms]
     uint8_t integralTime;
 
-    // uint16_t voltToDuty(float volt) { // 要らない？
-    //     return volt * 65535 / 12;
-    // }
+    uint16_t voltToDuty(float volt) {
+        return volt * 65535 / 12;
+    }
 
     // 常にAがmaster, Bがslave
     // angleの差に応じたpwm操作できると良いね
     void synchronizeMotors() {
-        if (angle[0] < angle[1]) { // AがBに遅れてる
-            volt[1] -= 15;
-        } else if (angle[0] > angle[1]) { // AがBより進んでる
-            volt[1] += 15;
+        // if (angle[0] < angle[1]) { // AがBに遅れてる
+        //     volt[1] -= 15;
+        // } else if (angle[0] > angle[1]) { // AがBより進んでる
+        //     volt[1] += 15;
+        // }
+
+        if (abs(goalAngle[0] - angle[0]) < abs(goalAngle[1] - angle[1])) { // motorAのほうが目標角に追従出来ている
+            volt[1] += motorB.synchronizeControl(angle[0], angle[1]);
+        } else if (abs(goalAngle[0] - angle[0]) > abs(goalAngle[1] - angle[1])) { // motorBのほうが目標角に追従出来ている
+            volt[0] += motorA.synchronizeControl(angle[1], angle[0]);
         }
     }
 };
