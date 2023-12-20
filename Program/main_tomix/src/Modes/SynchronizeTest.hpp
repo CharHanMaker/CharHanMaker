@@ -23,6 +23,7 @@ class SynchronizeTest : public Mode, Robot {
             AbsEncorders.resetRotationCount(i);
             rotationCnt[i] = AbsEncorders.getRotationCount(i);
             velPrev[i] = 0;
+            vel[i] = 0;
 
             goalAngle[i] = 0;
             goalVel[i] = 0;
@@ -40,10 +41,10 @@ class SynchronizeTest : public Mode, Robot {
         // PID gain
         motorA.setAnglePIDGain(0, 0, 0);
         motorA.setVelPIDGain(2, 20, 0);
-        motorA.setSynchronizePIDGain(5, 3, 0);
+        motorA.setSynchronizePIDGain(1, 5, 0);
         motorB.setAnglePIDGain(0, 0, 0);
         motorB.setVelPIDGain(2, 20, 0);
-        motorB.setSynchronizePIDGain(5, 3, 0);
+        motorB.setSynchronizePIDGain(1, 5, 0);
 
         isLoop = true;
         // while (abs(AbsEncorders.readDegree(0)) > 0.1) { // 初期位置まで回転 メモリから初期角度を読み込んだとき使う
@@ -59,62 +60,20 @@ class SynchronizeTest : public Mode, Robot {
 
     void loop() {
         while (isLoop) {
-            if (interval.read_us() >= Ts * 1000000) { // 5msごとに実行
-                interval.reset();
-
-                // いろいろ更新
-                for (uint8_t i = 0; i < 2; i++) {
-                    velPrev[i] = vel[i];
-                    angle[i] = AbsEncorders.readRadian(i); // i番目のエンコーダの弧度を取得
-                    vel[i] = -AbsEncorders.getVelocity(i); // i番目のエンコーダの角速度を取得[rad/s]
-                    acc[i] = (vel[i] - velPrev[i]) / Ts;
-
-                    goalVelPrev[i] = goalVel[i];
-
-                    rotationCnt[i] = AbsEncorders.getRotationCount(i);                          // overflow対策どうする 片方3000回転でもう片方が30回転とかあり得る
-                    continuousAngle[i] = AbsEncorders.getContinuousRadian(i) - initialAngle[i]; // rotationCntでoverflowを対処するので、ここでは考慮しなくて良い
-                }
-
-                // 目標角速度を決める、
-                integralTime = continuousTimer.read_ms(); // uint8_t と unsigned long だからerrorが生じるかも
-                continuousTime += integralTime;
-                if (continuousTime > 100 * cycleTime) continuousTime -= 99 * cycleTime; // 一応のoverflow対策（いらなそう）
-                continuousTimer.reset();
-
-                if (vel[0] < lowVel || vel[1] < lowVel) { // 立ち上がり中の目標角速度 2s掛けてlowVelまで立ち上がる
-
-                    for (uint8_t i = 0; i < 2; i++) // ここ作業中
-                        goalVel[i] += lowVel / 400; // lowVel / 2000ms * 5ms毎
-
-                } else { // 実機が立ち上がってからの目標角速度 lowVelで定速
-                    for (uint8_t i = 0; i < 2; i++)
-                        goalVel[i] = lowVel;
-                }
-
-                // 台形積分して目標角を出す overflow対策どうしよう
-                for (uint8_t i = 0; i < 2; i++) {
-                    goalAngle[i] = (goalVelPrev[i] + goalVel[i]) * integralTime / 2; // uint8_tを割ってるので微誤差発生注意
-
-                    if (goalAngle[i] >= __FLT_MAX__ / 10) // 目標角がoverflowに近づくとモータ停止
-                        isLoop = false;
-                }
-
-                // 目標角速度と目標角をコントローラに入れてPID制御
-                volt[0] = motorA.velControl(goalVel[0]) + motorA.angleControl(goalAngle[0]); // 角速度だけで制御
-                volt[1] = motorB.velControl(goalVel[1]) + motorB.angleControl(goalAngle[1]);
-
-                synchronizeMotors(); // PIDで同期
-                for (uint8_t i = 0; i < 2; i++) {
-                    constrain(volt[i], -12, 12); // -12 ~ 12 V に saturation
-                }
-
-                // モータへ出力
-                motorA.runOpenloop(voltToDuty(volt[0]), true);
-                motorB.runOpenloop(voltToDuty(volt[1]), true);
-
-                // 結果を出力したい
-                Serial.printf("goalVel:%.2f, currentVel:%.2f, volt:%.2f, gap:%.2f\n", goalVel[0], vel[0], volt[0], angle[0] - angle[1]);
+            Serial.printf("1\n");
+            for (uint8_t i = 0; i < 2; i++) {
+                AbsEncorders.read12BitValue(i);
+                vel[i] = -AbsEncorders.getVelocity(i);
             }
+
+            // モータへ出力
+            motorA.runOpenloop(voltToDuty(volt[0]), true);
+            motorB.runOpenloop(voltToDuty(volt[1]), true);
+
+            // 結果を出力したい
+            Serial.printf("goalVel:%.2f, currentVel:%.2f, volt:%.2f, gap:%.2f\n", goalVel[0], vel[0], volt[0], angle[0] - angle[1]);
+
+            delay(15);
         }
 
         motorA.stop();
