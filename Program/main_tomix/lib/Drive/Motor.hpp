@@ -27,6 +27,8 @@ class Motor {
     PID pid = PID(0, 0, 0, 0);
     MultipleAS5600 *encoder;
     uint8_t encoderPort;
+
+    int32_t pwmDutyCountPrev;
 };
 
 #endif

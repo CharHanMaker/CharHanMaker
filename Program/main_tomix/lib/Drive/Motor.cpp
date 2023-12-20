@@ -3,7 +3,7 @@
 Motor::Motor(uint8_t _ph, uint8_t _en, MultipleAS5600 *_encoder, uint8_t _encoderPort)
     : ph(_ph), en(_en),
       encoder(_encoder),
-      encoderPort(_encoderPort) {}
+      encoderPort(_encoderPort), pwmDutyCountPrev(0) {}
 
 void Motor::begin() {
     analogWriteFreq(10000); // 10KHzがちょうど良さそう
@@ -33,6 +33,11 @@ void Motor::runOpenloop(int32_t pwmDutyCount, bool brakeOnZero = false) {
     } else {
         digitalWrite(ph, LOW);
     }
+
+    if (abs(pwmDutyCountPrev - pwmDutyCount) > 65535) {
+        pwmDutyCount = 0;
+    }
+    pwmDutyCountPrev = pwmDutyCount;
     analogWrite(en, abs(pwmDutyCount));
 }
 

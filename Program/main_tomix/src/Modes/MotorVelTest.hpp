@@ -57,7 +57,7 @@ class MotorVelTest : public Mode, Robot {
                 } else if (str.startsWith("set")) {
                     str.remove(0, 3); // "set"の3文字部分を削除
                     targetVel = str.toFloat();
-                    velPID.resetIntegral();
+                    // velPID.resetIntegral();
                 }
             } else {
                 AbsEncorders.read12BitValue(0);
