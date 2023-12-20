@@ -5,8 +5,9 @@
 #include <./Modes/MotorVelTest.hpp>
 #include <./Modes/ControlMotorMode.hpp>
 #include <./Modes/SystemIdentification.hpp>
+#include <./Modes/SynchronizeTest.hpp>
 
-#define MODE_QTY 6
+#define MODE_QTY 7
 
 MainMode mainMode('M', "MainMode");
 TempMode tempMode('T', "TempMode");
@@ -14,8 +15,9 @@ SensorTestMode sensorTestMode('S', "SensorTest");
 MotorVelTest motorVelTest('V', "MotorVelTest");
 ControlMotorMode controlMode('C', "ControlMotorMode");
 SystemIdentificationMode systemidentificationMode('I', "システム同定");
+SynchronizeTest synchronizeTest('Y', "SynchronizeTest");
 
-Mode *modes[MODE_QTY] = {&mainMode, &tempMode, &sensorTestMode, &motorVelTest, &controlMode, &systemidentificationMode};
+Mode *modes[MODE_QTY] = {&mainMode, &tempMode, &sensorTestMode, &motorVelTest, &controlMode, &systemidentificationMode, &synchronizeTest};
 Mode *currentMode = &tempMode;
 
 void setup() {
