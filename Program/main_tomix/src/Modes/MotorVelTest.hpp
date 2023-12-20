@@ -26,6 +26,7 @@ class MotorVelTest : public Mode, Robot {
         login1();
 
         motorA.setSaturation(65535, -65535);
+        motorB.setSaturation(65535, -65535);
 
         velPID.setLimit(-12, 12);
         velPID.reset();
@@ -41,6 +42,8 @@ class MotorVelTest : public Mode, Robot {
         while (abs(AbsEncorders.readDegree(0)) > 0.1) {
             motorA.runOpenloop(voltToDuty(1), true);
         }
+
+
         Serial.printf("ZeroDeg0:%.2f\n", float(AbsEncorders.readDegree(0)));
     }
 
@@ -95,6 +98,7 @@ class MotorVelTest : public Mode, Robot {
     float error;
     float output;
     PID velPID = PID(Kp, Ki, Kd, dt);
+    
 
     bool isLoop = true;
 

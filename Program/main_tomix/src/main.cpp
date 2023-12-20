@@ -6,8 +6,9 @@
 #include <./Modes/ControlMotorMode.hpp>
 #include <./Modes/SystemIdentification.hpp>
 #include <./Modes/SynchronizeTest.hpp>
+#include <./Modes/MotorAngleTest.hpp>
 
-#define MODE_QTY 7
+#define MODE_QTY 8
 
 MainMode mainMode('M', "MainMode");
 TempMode tempMode('T', "TempMode");
@@ -16,8 +17,9 @@ MotorVelTest motorVelTest('V', "MotorVelTest");
 ControlMotorMode controlMode('C', "ControlMotorMode");
 SystemIdentificationMode systemidentificationMode('I', "システム同定");
 SynchronizeTest synchronizeTest('Y', "SynchronizeTest");
+MotorAngleTest motorAngleTest('A',"Motor Angle Test");
 
-Mode *modes[MODE_QTY] = {&mainMode, &tempMode, &sensorTestMode, &motorVelTest, &controlMode, &systemidentificationMode, &synchronizeTest};
+Mode *modes[MODE_QTY] = {&mainMode, &tempMode, &sensorTestMode, &motorVelTest, &controlMode, &systemidentificationMode, &synchronizeTest ,&motorAngleTest};
 Mode *currentMode = &tempMode;
 
 void setup() {
