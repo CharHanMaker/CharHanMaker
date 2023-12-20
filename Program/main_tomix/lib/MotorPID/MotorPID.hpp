@@ -14,9 +14,9 @@ class MotorPid : public Motor { // Motorクラスを継承
     void setSynchronizePIDLimit(float _limitMin, float _limitMax);
     void resetPID();
 
-    int32_t velControl(float radPerSec);
-    int32_t angleControl(float rad);                             // 引数は目標値, PIDを通して電圧を返す
-    int32_t synchronizeControl(float radMaster, float radSlave); //
+    float velControl(float radPerSec);
+    float angleControl(float rad);                             // 引数は目標値, PIDを通して電圧を返す
+    float synchronizeControl(float radMaster, float radSlave); //
 
   private:
     uint8_t ph;
@@ -33,7 +33,7 @@ class MotorPid : public Motor { // Motorクラスを継承
     float error;
     float velAngular;
     float angle;
-    int32_t out;
+    float out;
 };
 
 #endif

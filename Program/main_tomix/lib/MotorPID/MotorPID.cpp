@@ -29,7 +29,7 @@ void MotorPid::resetPID() {
     pidAngle.reset();
 }
 
-int32_t MotorPid::velControl(float radPerSec) { // 目標角速度rad/sが引数のPID制御関数
+float MotorPid::velControl(float radPerSec) { // 目標角速度rad/sが引数のPID制御関数
     encoder->readRadian(encoderPort);
     velAngular = encoder->getVelocity(encoderPort);
     error = radPerSec - velAngular;
@@ -41,7 +41,7 @@ int32_t MotorPid::velControl(float radPerSec) { // 目標角速度rad/sが引数
     // Motor::runOpenloop(out); // これは外に出す
 }
 
-int32_t MotorPid::angleControl(float rad) { // 目標角radが引数のPID制御関数
+float MotorPid::angleControl(float rad) { // 目標角radが引数のPID制御関数
     angle = encoder->readRadian(encoderPort);
     error = rad - angle;
 
@@ -50,7 +50,7 @@ int32_t MotorPid::angleControl(float rad) { // 目標角radが引数のPID制御
     return out = pidAngle.getPID();
 }
 
-int32_t MotorPid::synchronizeControl(float radMaster, float radSlave) { // モータ同期のためのPID制御関数
+float MotorPid::synchronizeControl(float radMaster, float radSlave) { // モータ同期のためのPID制御関数
     error = radMaster - radSlave;
 
     pidSynchronize.appendError(error);

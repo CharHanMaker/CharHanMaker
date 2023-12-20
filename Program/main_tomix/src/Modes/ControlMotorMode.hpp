@@ -35,8 +35,8 @@ class ControlMotorMode : public Mode, Robot {
 
             volt[i] = 0;
         }
-        highVel = 0.523598775; // rad/s = 30[deg/s]
-        lowVel = 0.349065849;  // 20[deg/s]
+        highVel = 30 * PI / 180; // rad/s = 30[deg/s]
+        lowVel = 20 * PI / 180;  // 20[deg/s]
 
         // PID gain
         motorA.setAnglePIDGain(0, 0, 0);
@@ -46,8 +46,8 @@ class ControlMotorMode : public Mode, Robot {
         motorB.setVelPIDGain(0, 0, 0);
         motorB.setSynchronizePIDGain(0, 0, 0);
 
-        continuousTime = 0; // ms
-        cycleTime = 400;    // 0.4s
+        continuousTime = 0;                                                // ms
+        cycleTime = TWO_PI / 3 / highVel + (TWO_PI - TWO_PI / 3) / lowVel; // 周期s
         integralTime = 0;
 
         interval.reset();
@@ -84,7 +84,7 @@ class ControlMotorMode : public Mode, Robot {
                 for (uint8_t i = 0; i < 2; i++) // ここ作業中
                     goalVel[i] += lowVel / 400; // lowVel / 2000ms * 5ms毎
 
-            } else {                                     // 実機が立ち上がってからの目標角速度 要変更
+            } else {                                     // 実機が立ち上がってからの目標角速度 要修正
                 if (continuousTime % cycleTime <= 300) { // t <= T*3/4
                     for (uint8_t i = 0; i < 2; i++) {
                         goalVel[i] = lowVel;
@@ -144,7 +144,7 @@ class ControlMotorMode : public Mode, Robot {
     float goalAngle[2];
     float goalVel[2];
     float goalVelPrev[2];
-    int32_t volt[2]; // モータに入力する電圧のpwm
+    float volt[2]; // モータに入力する電圧のpwm
     // float angleMaster, angleSlave; // master : A, slave : B で固定するから要らないかも
     unsigned long continuousTime, cycleTime; // 累計時間と周期[ms]
     uint8_t integralTime;
