@@ -33,17 +33,23 @@ class MotorAngleTest : public Mode, Robot {
         velPID[1].setLimit(-12, 12);
         velPID[1].reset();
 
+
         Serial.setTimeout(5);
         isLoop = true;
         AbsEncorders.readDegree(0);
         AbsEncorders.readDegree(1);
+
         while (abs(AbsEncorders.readDegree(0)) > 0.1) {
+            AbsEncorders.readDegree(0);
+            AbsEncorders.readDegree(1); 
             motorA.runOpenloop(voltToDuty(1), true);
         }
         motorA.stop();
         AbsEncorders.readDegree(0);
         AbsEncorders.readDegree(1);
         while (abs(AbsEncorders.readDegree(1)) > 0.1) {
+            AbsEncorders.readDegree(0);
+            AbsEncorders.readDegree(1); 
             motorB.runOpenloop(voltToDuty(1), true);
         }
         motorB.stop();
@@ -57,7 +63,12 @@ class MotorAngleTest : public Mode, Robot {
             if (Serial.available() > 0) {
                 getSerialData();
             } else {
-                motorCtrl();
+                getSensors();
+                velCtrl();
+                // for (size_t i = 0; i < 2; i++){
+                //     printVal(i,angle[i].current);
+                // }
+                // Serial.println();
             }
         }
 
@@ -65,14 +76,7 @@ class MotorAngleTest : public Mode, Robot {
         delay(1000);
     }
 
-    void motorCtrl(){
-        for (size_t i = 0; i < 2; i++){
-            angle[i].prev = angle[i].current;
-            angle[i].current = AbsEncorders.readRadian(i);
-            vel[i].current = AbsEncorders.getVelocity(i); //[rad/s]
-            vel[i].error = -(vel[i].target - vel[i].current);        // これはmotorA.setCW()でなくせるはず
-        }
-        
+    void velCtrl(){
         for (size_t i = 0; i < 2; i++){
             velPID[i].appendError(vel[i].error);
             velPID[i].compute();
@@ -83,6 +87,19 @@ class MotorAngleTest : public Mode, Robot {
         for (size_t i = 0; i < 2; i++){
             Serial.printf("targetVel:%.2f, currentVel:%.2f, error:%.2f, output:%.2f\n", vel[i].target, vel[i].current, vel[i].error, vel[i].output);
         }
+    }
+
+    void getSensors(){
+        for (size_t i = 0; i < 2; i++){
+            angle[i].prev = angle[i].current;
+            angle[i].current = AbsEncorders.readRadian(i);
+            vel[i].current = AbsEncorders.getVelocity(i); //[rad/s]
+            vel[i].error = -(vel[i].target - vel[i].current);        // これはmotorA.setCW()でなくせるはず
+        }
+    }
+
+    void angleCtrl(){
+
     }
 
     void getSerialData(){
@@ -100,6 +117,10 @@ class MotorAngleTest : public Mode, Robot {
         }
     }
 
+    void printVal(int i,float data){
+        Serial.printf("angle:[%d]:%.2f ",i,data);
+    }
+
     void after() {
         Serial.printf("after %s\n", getModeName());
         motorA.stop();
@@ -107,10 +128,13 @@ class MotorAngleTest : public Mode, Robot {
     }
 
   private:
-    const float Kp = 0.0;
-    const float Ki = 1.0;
-    const float Kd = 0.0;
-    const float dt = 0.003; // 5ms
+    // typedefs 
+    typedef struct{
+        float Kp;
+        float Ki;
+        float Kd;
+        float dt;
+    } Gain;
 
     typedef struct{
         float target;
@@ -120,14 +144,36 @@ class MotorAngleTest : public Mode, Robot {
         float output;
     }ctrlValues;
 
+    // values for control
     ctrlValues angle[2];
     ctrlValues vel[2];
 
+    // Motor def
     MotorPid *motor[2] = {&motorA,&motorB};
     
+    // Gains
+    Gain velGain = {
+        .Kp = 0.0,
+        .Ki = 1.0,
+        .Kd = 0.0,
+        .dt = 0.003
+    };
+
+    Gain angGain = {
+        .Kp = 1.0,
+        .Ki = 0.0,
+        .Kd = 0.0,
+        .dt = 0.003
+    };
+
+    // PID Objects
     PID velPID[2] = {
-                        PID(Kp, Ki, Kd, dt),
-                        PID(Kp, Ki, Kd, dt)
+                        PID(velGain.Kp, velGain.Ki, velGain.Kd, velGain.dt),
+                        PID(velGain.Kp, velGain.Ki, velGain.Kd, velGain.dt)
+                    };
+    PID angPID[2] = {
+                        PID(angGain.Kp, angGain.Ki, angGain.Kd, angGain.dt),
+                        PID(angGain.Kp, angGain.Ki, angGain.Kd, angGain.dt)
                     };
 
     bool isLoop = true;
