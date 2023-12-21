@@ -97,11 +97,11 @@ float MultipleAS5600::getVelocity(uint8_t _sensorNumber) { // returns [rad/s]
 }
 
 float MultipleAS5600::getContinuousDegree(uint8_t _sensorNumber) {
-    return readDegree(_sensorNumber) - count[_sensorNumber] * 360;
+    return readDegree(_sensorNumber) + count[_sensorNumber] * 360;
 }
 
 float MultipleAS5600::getContinuousRadian(uint8_t _sensorNumber) {
-    return readRadian(_sensorNumber) - count[_sensorNumber] * TWO_PI;
+    return readRadian(_sensorNumber) + count[_sensorNumber] * TWO_PI;
 }
 
 // CW　正回転 CCW 逆回転

@@ -33,9 +33,9 @@ class MotorAngleTest : public Mode, Robot {
         velPID[1].setLimit(-12, 12);
         velPID[1].reset();
 
-        angPID[0].setLimit(-12, 12);
+        angPID[0].setLimit(-6, 6);
         angPID[0].reset();
-        angPID[1].setLimit(-12, 12);
+        angPID[1].setLimit(-6, 6);
         angPID[1].reset();
 
         Serial.setTimeout(5);
@@ -92,8 +92,9 @@ class MotorAngleTest : public Mode, Robot {
     }
 
     void angleCtrl(){
-        angleContinuous[0].target = 0; //目標値
-        angleContinuous[0].error = -(angleContinuous[0].target - angleContinuous[0].current); //偏差
+        // angleContinuous[0].target = 0; //目標値
+        angleContinuous[0].target = angleContinuous[1].current; //目標値
+        angleContinuous[0].error = (angleContinuous[0].target - angleContinuous[0].current); //偏差
         angPID[0].appendError(angleContinuous[0].error);
         angPID[0].compute();
         angleContinuous[0].output = angPID[0].getPID();
@@ -128,6 +129,8 @@ class MotorAngleTest : public Mode, Robot {
             motorA.runOpenloop(voltToDuty(1), true);
         }
         motorA.stop();
+        AbsEncorders.resetRotationCount(0);
+
         AbsEncorders.readDegree(0);
         AbsEncorders.readDegree(1);
         while (abs(AbsEncorders.readDegree(1)) > 0.1) {
@@ -136,6 +139,7 @@ class MotorAngleTest : public Mode, Robot {
             motorB.runOpenloop(voltToDuty(1), true);
         }
         motorB.stop();
+        AbsEncorders.resetRotationCount(1);
     }
 
     void printVal(int i,float data){
@@ -182,9 +186,9 @@ class MotorAngleTest : public Mode, Robot {
     };
 
     Gain angGain = {
-        .Kp = 1.0,
-        .Ki = 0.0,
-        .Kd = 0.0,
+        .Kp = 7.0,
+        .Ki = 0.005,
+        .Kd = 0.005,
         .dt = 0.003
     };
 
