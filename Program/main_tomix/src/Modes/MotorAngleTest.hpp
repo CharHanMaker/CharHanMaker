@@ -33,29 +33,15 @@ class MotorAngleTest : public Mode, Robot {
         velPID[1].setLimit(-12, 12);
         velPID[1].reset();
 
+        angPID[0].setLimit(-12, 12);
+        angPID[0].reset();
+        angPID[1].setLimit(-12, 12);
+        angPID[1].reset();
 
         Serial.setTimeout(5);
         isLoop = true;
-        AbsEncorders.readDegree(0);
-        AbsEncorders.readDegree(1);
 
-        while (abs(AbsEncorders.readDegree(0)) > 0.1) {
-            AbsEncorders.readDegree(0);
-            AbsEncorders.readDegree(1); 
-            motorA.runOpenloop(voltToDuty(1), true);
-        }
-        motorA.stop();
-        AbsEncorders.readDegree(0);
-        AbsEncorders.readDegree(1);
-        while (abs(AbsEncorders.readDegree(1)) > 0.1) {
-            AbsEncorders.readDegree(0);
-            AbsEncorders.readDegree(1); 
-            motorB.runOpenloop(voltToDuty(1), true);
-        }
-        motorB.stop();
-
-
-        Serial.printf("ZeroDeg0:%.2f\n", float(AbsEncorders.readDegree(0)));
+        turnMotorZeroPos();
     }
 
     void loop() {
@@ -64,7 +50,8 @@ class MotorAngleTest : public Mode, Robot {
                 getSerialData();
             } else {
                 getSensors();
-                velCtrl();
+                angleCtrl();
+                // velCtrl();
                 // for (size_t i = 0; i < 2; i++){
                 //     printVal(i,angle[i].current);
                 // }
@@ -78,6 +65,7 @@ class MotorAngleTest : public Mode, Robot {
 
     void velCtrl(){
         for (size_t i = 0; i < 2; i++){
+            vel[i].error = -(vel[i].target - vel[i].current);        // これはmotorA.setCW()でなくせるはず
             velPID[i].appendError(vel[i].error);
             velPID[i].compute();
             vel[i].output = velPID[i].getPID();
@@ -91,15 +79,29 @@ class MotorAngleTest : public Mode, Robot {
 
     void getSensors(){
         for (size_t i = 0; i < 2; i++){
+            // prev
             angle[i].prev = angle[i].current;
+            angleContinuous[i].prev = angleContinuous[i].current;
+            vel[i].prev = vel[i].current;
+
+            // get Sensors
             angle[i].current = AbsEncorders.readRadian(i);
-            vel[i].current = AbsEncorders.getVelocity(i); //[rad/s]
-            vel[i].error = -(vel[i].target - vel[i].current);        // これはmotorA.setCW()でなくせるはず
+            angleContinuous[i].current = AbsEncorders.getContinuousRadian(i);
+            vel[i].current = AbsEncorders.getVelocity(i); //[rad/s]            
         }
     }
 
     void angleCtrl(){
-
+        angleContinuous[0].target = 0; //目標値
+        angleContinuous[0].error = -(angleContinuous[0].target - angleContinuous[0].current); //偏差
+        angPID[0].appendError(angleContinuous[0].error);
+        angPID[0].compute();
+        angleContinuous[0].output = angPID[0].getPID();
+        motor[0]->runOpenloop(voltToDuty(angleContinuous[0].output), true);
+        
+        for (size_t i = 0; i < 1; i++){
+            Serial.printf("targetAng:%.2f, currentAng:%.2f, error:%.2f, output:%.2f\n", angleContinuous[i].target, angleContinuous[i].current, angleContinuous[i].error, angleContinuous[i].output);
+        }
     }
 
     void getSerialData(){
@@ -115,6 +117,25 @@ class MotorAngleTest : public Mode, Robot {
             vel[1].target = vel[0].target;
             // velPID.resetIntegral();
         }
+    }
+
+    void turnMotorZeroPos(){
+        AbsEncorders.readDegree(0);
+        AbsEncorders.readDegree(1);
+        while (abs(AbsEncorders.readDegree(0)) > 0.1) {
+            AbsEncorders.readDegree(0);
+            AbsEncorders.readDegree(1); 
+            motorA.runOpenloop(voltToDuty(1), true);
+        }
+        motorA.stop();
+        AbsEncorders.readDegree(0);
+        AbsEncorders.readDegree(1);
+        while (abs(AbsEncorders.readDegree(1)) > 0.1) {
+            AbsEncorders.readDegree(0);
+            AbsEncorders.readDegree(1); 
+            motorB.runOpenloop(voltToDuty(1), true);
+        }
+        motorB.stop();
     }
 
     void printVal(int i,float data){
@@ -146,6 +167,7 @@ class MotorAngleTest : public Mode, Robot {
 
     // values for control
     ctrlValues angle[2];
+    ctrlValues angleContinuous[2];
     ctrlValues vel[2];
 
     // Motor def
