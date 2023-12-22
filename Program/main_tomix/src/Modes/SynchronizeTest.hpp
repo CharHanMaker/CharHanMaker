@@ -78,14 +78,11 @@ class SynchronizeTest : public Mode, Robot {
             angPID[0].compute();
             volt[0] += angPID[0].getPID();
 
-            // // モータへ電圧を入力
-            for (size_t i = 0; i < 2; i++) {
-                constrain(volt[i], -1.5, 1.5); // saturation input volt
-                // motor[i]->runOpenloop(voltToDuty(volt[i]), true);
-            }
-            volt[0] = 1;
+            // モータへ電圧を入力
+            volt[1] = 1;
+            saturateVolt(2);
             motor[0]->runOpenloop(voltToDuty(volt[0]), true);
-            motor[1]->runOpenloop(voltToDuty(1), true);
+            motor[1]->runOpenloop(voltToDuty(volt[1]), true);
 
             // 結果を出力したい
             Serial.printf("currentAng1:%.2f, vel1:%.2f, volt1:%.2f, currentAng2:%.2f, vel2:%.2f, volt2:%.2f, error:%.2f\n", angleContinuous[0].current, vel[0].current, volt[0], angleContinuous[1].current, vel[1].current, volt[1], angleContinuous[0].error);
@@ -119,6 +116,14 @@ class SynchronizeTest : public Mode, Robot {
     void resetVolt() {
         for (size_t i = 0; i < 2; i++) {
             volt[i] = 0;
+        }
+    }
+
+    void saturateVolt(float absRange) { // volt : -absRange ~ +absRange [V]
+        absRange = abs(absRange);
+        for (size_t i = 0; i < 2; i++) {
+            volt[i] = ((volt[i]) < -absRange ? -absRange : ((volt[i]) > absRange ? absRange : (volt[i])));
+            // motor[i]->runOpenloop(voltToDuty(volt[i]), true);
         }
     }
 
