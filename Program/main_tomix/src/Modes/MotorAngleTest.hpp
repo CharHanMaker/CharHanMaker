@@ -50,6 +50,8 @@ class MotorAngleTest : public Mode, Robot {
                 getSerialData();
             } else {
                 getSensors();
+
+                motor[1]->runOpenloop(voltToDuty(1), true);
                 angleCtrl();
                 // velCtrl();
                 // for (size_t i = 0; i < 2; i++){
@@ -100,9 +102,10 @@ class MotorAngleTest : public Mode, Robot {
         angleContinuous[0].output = angPID[0].getPID();
         motor[0]->runOpenloop(voltToDuty(angleContinuous[0].output), true);
         
-        for (size_t i = 0; i < 1; i++){
-            Serial.printf("targetAng:%.2f, currentAng:%.2f, error:%.2f, output:%.2f\n", angleContinuous[i].target, angleContinuous[i].current, angleContinuous[i].error, angleContinuous[i].output);
-        }
+        // for (size_t i = 0; i < 1; i++){
+        //     Serial.printf("targetAng:%.2f, currentAng:%.2f, error:%.2f, output:%.2f\n", angleContinuous[i].target, angleContinuous[i].current, angleContinuous[i].error, angleContinuous[i].output);
+        // }
+        Serial.printf("currentAng1:%.2f, vel1:%.2f, currentAng2:%.2f, vel2:%.2f\n", angleContinuous[0].current, vel[0].current, angleContinuous[1].current, vel[1].current);
     }
 
     void getSerialData(){

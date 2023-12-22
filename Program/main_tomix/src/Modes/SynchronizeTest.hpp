@@ -9,9 +9,9 @@ class SynchronizeTest : public Mode, Robot {
   public:
     SynchronizeTest(char letter, const char name[]) : Mode(letter, name) {}
 
-    void init() {
-        deviceBegin();
-    }
+    // void init() { // 諸悪の根源
+    //     deviceBegin();
+    // }
 
     void before() {
         Serial.printf("loop %s\n", getModeName());
@@ -33,6 +33,7 @@ class SynchronizeTest : public Mode, Robot {
         lowVel = 10 * PI / 180;  // 5[deg/s]
         for (size_t i = 0; i < 2; i++) {
             vel[i].target = lowVel;
+            vel[i].current = 0;
         }
 
         motorA.setSaturation(65535, -65535);
@@ -62,25 +63,31 @@ class SynchronizeTest : public Mode, Robot {
             getSensors();
             resetVolt();
 
-            // // 目標の定速へPID
-            // for (size_t i = 0; i < 2; i++) {
-            //     vel[i].error = -(vel[i].target - vel[i].current);
-            //     velPID[i].appendError(vel[i].error);
-            //     velPID[i].compute();
+            // volt[0] = 1;
+            // volt[1] = 1;
 
-            //     volt[i] += velPID[i].getPID();
-            // }
+            // 目標の定速へPID
+            for (size_t i = 0; i < 2; i++) {
+                vel[i].error = (vel[i].target - vel[i].current);
+                velPID[i].appendError(vel[i].error);
+                velPID[i].compute();
 
-            // // 角度同期
+                volt[i] += velPID[i].getPID();
+            }
+
+            // 角度同期
             angleContinuous[0].target = angleContinuous[1].current;                              // 目標値
             angleContinuous[0].error = (angleContinuous[0].target - angleContinuous[0].current); // 偏差
             angPID[0].appendError(angleContinuous[0].error);
             angPID[0].compute();
             volt[0] += angPID[0].getPID();
 
+            // saturate input voltage
+            for (size_t i = 0; i < 2; i++) {
+                volt[i] = constrain(volt[i], -3, 3);
+            }
+
             // モータへ電圧を入力
-            volt[1] = 1;
-            saturateVolt(2);
             motor[0]->runOpenloop(voltToDuty(volt[0]), true);
             motor[1]->runOpenloop(voltToDuty(volt[1]), true);
 
@@ -119,12 +126,9 @@ class SynchronizeTest : public Mode, Robot {
         }
     }
 
-    void saturateVolt(float absRange) { // volt : -absRange ~ +absRange [V]
+    void saturateValue(float value, float absRange) { // volt : -absRange ~ +absRange [V]
         absRange = abs(absRange);
-        for (size_t i = 0; i < 2; i++) {
-            volt[i] = ((volt[i]) < -absRange ? -absRange : ((volt[i]) > absRange ? absRange : (volt[i])));
-            // motor[i]->runOpenloop(voltToDuty(volt[i]), true);
-        }
+        value = constrain(value, -absRange, absRange);
     }
 
     void turnMotorZeroPos() {
