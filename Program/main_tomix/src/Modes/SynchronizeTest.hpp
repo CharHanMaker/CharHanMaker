@@ -30,7 +30,7 @@ class SynchronizeTest : public Mode, Robot {
         /*　--------------------EEPROMからエンコーダの初期角度の読み込み-------------------- */
 
         highVel = 30 * PI / 180; // rad/s = 30[deg/s]
-        lowVel = 10 * PI / 180;  // 5[deg/s]
+        lowVel = 450 * PI / 180;  // 5[deg/s]
         for (size_t i = 0; i < 2; i++) {
             vel[i].target = lowVel;
             vel[i].current = 0;
@@ -68,7 +68,7 @@ class SynchronizeTest : public Mode, Robot {
 
             // 目標の定速へPID
             for (size_t i = 0; i < 2; i++) {
-                vel[i].error = (vel[i].target - vel[i].current);
+                vel[i].error = -(vel[i].target - vel[i].current);
                 velPID[i].appendError(vel[i].error);
                 velPID[i].compute();
 
@@ -84,7 +84,7 @@ class SynchronizeTest : public Mode, Robot {
 
             // saturate input voltage
             for (size_t i = 0; i < 2; i++) {
-                volt[i] = constrain(volt[i], -3, 3);
+                volt[i] = constrain(volt[i], -6, 6);
             }
 
             // モータへ電圧を入力
@@ -177,8 +177,8 @@ class SynchronizeTest : public Mode, Robot {
         .dt = 0.003};
 
     Gain angGain = {
-        .Kp = 7.0,
-        .Ki = 0.005,
+        .Kp = 20.0,
+        .Ki = 2.0,
         .Kd = 0.005,
         .dt = 0.003};
 
