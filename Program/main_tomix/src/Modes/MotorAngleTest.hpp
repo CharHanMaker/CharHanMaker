@@ -33,13 +33,16 @@ class MotorAngleTest : public Mode, Robot {
         velPID[1].setLimit(-12, 12);
         velPID[1].reset();
 
-        angPID[0].setLimit(-6, 6);
+        angPID[0].setLimit(-12, 12);
         angPID[0].reset();
-        angPID[1].setLimit(-6, 6);
+        angPID[1].setLimit(-12, 12);
         angPID[1].reset();
 
         Serial.setTimeout(5);
         isLoop = true;
+
+        vel[0].target = 0;
+        vel[1].target = 0;
 
         turnMotorZeroPos();
     }
@@ -51,9 +54,9 @@ class MotorAngleTest : public Mode, Robot {
             } else {
                 getSensors();
 
-                motor[1]->runOpenloop(voltToDuty(1), true);
+                // motor[1]->runOpenloop(voltToDuty(1), true);
                 angleCtrl();
-                // velCtrl();
+                velCtrl();
                 // for (size_t i = 0; i < 2; i++){
                 //     printVal(i,angle[i].current);
                 // }
@@ -65,22 +68,28 @@ class MotorAngleTest : public Mode, Robot {
         delay(1000);
     }
 
-    void velCtrl(){
-        for (size_t i = 0; i < 2; i++){
-            vel[i].error = -(vel[i].target - vel[i].current);        // これはmotorA.setCW()でなくせるはず
-            velPID[i].appendError(vel[i].error);
-            velPID[i].compute();
-            vel[i].output = velPID[i].getPID();
-            motor[i]->runOpenloop(voltToDuty(vel[i].output), true);
-        }
-        
-        for (size_t i = 0; i < 2; i++){
-            Serial.printf("targetVel:%.2f, currentVel:%.2f, error:%.2f, output:%.2f\n", vel[i].target, vel[i].current, vel[i].error, vel[i].output);
-        }
+    void velCtrl() {
+        uint8_t i = 1;
+        vel[i].error = -(vel[i].target - vel[i].current); // これはmotorA.setCW()でなくせるはず
+        velPID[i].appendError(vel[i].error);
+        velPID[i].compute();
+        vel[i].output = velPID[i].getPID();
+        motor[i]->runOpenloop(voltToDuty(vel[i].output), true);
+        // for (size_t i = 0; i < 2; i++) {
+        //     vel[i].error = -(vel[i].target - vel[i].current); // これはmotorA.setCW()でなくせるはず
+        //     velPID[i].appendError(vel[i].error);
+        //     velPID[i].compute();
+        //     vel[i].output = velPID[i].getPID();
+        //     motor[i]->runOpenloop(voltToDuty(vel[i].output), true);
+        // }
+
+        // for (size_t i = 0; i < 2; i++) {
+        //     Serial.printf("targetVel:%.2f, currentVel:%.2f, error:%.2f, output:%.2f\n", vel[i].target, vel[i].current, vel[i].error, vel[i].output);
+        // }
     }
 
-    void getSensors(){
-        for (size_t i = 0; i < 2; i++){
+    void getSensors() {
+        for (size_t i = 0; i < 2; i++) {
             // prev
             angle[i].prev = angle[i].current;
             angleContinuous[i].prev = angleContinuous[i].current;
@@ -89,26 +98,26 @@ class MotorAngleTest : public Mode, Robot {
             // get Sensors
             angle[i].current = AbsEncorders.readRadian(i);
             angleContinuous[i].current = AbsEncorders.getContinuousRadian(i);
-            vel[i].current = AbsEncorders.getVelocity(i); //[rad/s]            
+            vel[i].current = AbsEncorders.getVelocity(i); //[rad/s]
         }
     }
 
-    void angleCtrl(){
+    void angleCtrl() {
         // angleContinuous[0].target = 0; //目標値
-        angleContinuous[0].target = angleContinuous[1].current; //目標値
-        angleContinuous[0].error = (angleContinuous[0].target - angleContinuous[0].current); //偏差
+        angleContinuous[0].target = angleContinuous[1].current;                              // 目標値
+        angleContinuous[0].error = (angleContinuous[0].target - angleContinuous[0].current); // 偏差
         angPID[0].appendError(angleContinuous[0].error);
         angPID[0].compute();
         angleContinuous[0].output = angPID[0].getPID();
         motor[0]->runOpenloop(voltToDuty(angleContinuous[0].output), true);
-        
+
         // for (size_t i = 0; i < 1; i++){
         //     Serial.printf("targetAng:%.2f, currentAng:%.2f, error:%.2f, output:%.2f\n", angleContinuous[i].target, angleContinuous[i].current, angleContinuous[i].error, angleContinuous[i].output);
         // }
         Serial.printf("currentAng1:%.2f, vel1:%.2f, currentAng2:%.2f, vel2:%.2f\n", angleContinuous[0].current, vel[0].current, angleContinuous[1].current, vel[1].current);
     }
 
-    void getSerialData(){
+    void getSerialData() {
         String str = Serial.readStringUntil('\n'); // 改行までの文字列を受信
         if (str == "stop") {                       // stopと入力されたらモータを止める
             isLoop = false;                        // whileループを抜ける
@@ -117,19 +126,19 @@ class MotorAngleTest : public Mode, Robot {
             logout1();
         } else if (str.startsWith("set")) {
             str.remove(0, 3); // "set"の3文字部分を削除
-            vel[0].target = str.toFloat();
-            vel[1].target = vel[0].target;
+            vel[1].target = str.toFloat();
+            // vel[1].target = vel[0].target;
             // velPID.resetIntegral();
         }
     }
 
-    void turnMotorZeroPos(){
+    void turnMotorZeroPos() {
         AbsEncorders.readDegree(0);
         AbsEncorders.readDegree(1);
         while (abs(AbsEncorders.readDegree(0)) > 0.1) {
             AbsEncorders.readDegree(0);
-            AbsEncorders.readDegree(1); 
-            motorA.runOpenloop(voltToDuty(1), true);
+            AbsEncorders.readDegree(1);
+            motorA.runOpenloop(voltToDuty(2), true);
         }
         motorA.stop();
         AbsEncorders.resetRotationCount(0);
@@ -138,15 +147,15 @@ class MotorAngleTest : public Mode, Robot {
         AbsEncorders.readDegree(1);
         while (abs(AbsEncorders.readDegree(1)) > 0.1) {
             AbsEncorders.readDegree(0);
-            AbsEncorders.readDegree(1); 
-            motorB.runOpenloop(voltToDuty(1), true);
+            AbsEncorders.readDegree(1);
+            motorB.runOpenloop(voltToDuty(2), true);
         }
         motorB.stop();
         AbsEncorders.resetRotationCount(1);
     }
 
-    void printVal(int i,float data){
-        Serial.printf("angle:[%d]:%.2f ",i,data);
+    void printVal(int i, float data) {
+        Serial.printf("angle:[%d]:%.2f ", i, data);
     }
 
     void after() {
@@ -156,21 +165,21 @@ class MotorAngleTest : public Mode, Robot {
     }
 
   private:
-    // typedefs 
-    typedef struct{
+    // typedefs
+    typedef struct {
         float Kp;
         float Ki;
         float Kd;
         float dt;
     } Gain;
 
-    typedef struct{
+    typedef struct {
         float target;
         float current;
         float prev;
         float error;
         float output;
-    }ctrlValues;
+    } ctrlValues;
 
     // values for control
     ctrlValues angle[2];
@@ -178,32 +187,28 @@ class MotorAngleTest : public Mode, Robot {
     ctrlValues vel[2];
 
     // Motor def
-    MotorPid *motor[2] = {&motorA,&motorB};
-    
+    MotorPid *motor[2] = {&motorA, &motorB};
+
     // Gains
     Gain velGain = {
         .Kp = 0.0,
         .Ki = 1.0,
         .Kd = 0.0,
-        .dt = 0.003
-    };
+        .dt = 0.003};
 
     Gain angGain = {
         .Kp = 7.0,
-        .Ki = 0.005,
-        .Kd = 0.005,
-        .dt = 0.003
-    };
+        .Ki = 0.01,
+        .Kd = 0.01,
+        .dt = 0.003};
 
     // PID Objects
     PID velPID[2] = {
-                        PID(velGain.Kp, velGain.Ki, velGain.Kd, velGain.dt),
-                        PID(velGain.Kp, velGain.Ki, velGain.Kd, velGain.dt)
-                    };
+        PID(velGain.Kp, velGain.Ki, velGain.Kd, velGain.dt),
+        PID(velGain.Kp, velGain.Ki, velGain.Kd, velGain.dt)};
     PID angPID[2] = {
-                        PID(angGain.Kp, angGain.Ki, angGain.Kd, angGain.dt),
-                        PID(angGain.Kp, angGain.Ki, angGain.Kd, angGain.dt)
-                    };
+        PID(angGain.Kp, angGain.Ki, angGain.Kd, angGain.dt),
+        PID(angGain.Kp, angGain.Ki, angGain.Kd, angGain.dt)};
 
     bool isLoop = true;
 
