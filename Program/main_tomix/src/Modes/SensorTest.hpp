@@ -10,6 +10,8 @@ class SensorTestMode : public Mode, Robot {
     SensorTestMode(char letter, const char name[]) : Mode(letter, name) {}
 
     void before() {
+        AbsEncorders.setDirection(0, CW);
+        AbsEncorders.setDirection(0, CW);
         login1();
         checkType = '-';
         Serial.printf("loop %s\n", getModeName());
