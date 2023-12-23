@@ -48,7 +48,7 @@ class Robot {
         Wire.begin();
         AbsEncorders.begin();
         AbsEncorders.setDirection(0, CCW);
-        AbsEncorders.setDirection(1, CCW);
+        AbsEncorders.setDirection(1, CW);
 
         // ピンの設定
         pinMode(CorePins::Buzzer, OUTPUT);
