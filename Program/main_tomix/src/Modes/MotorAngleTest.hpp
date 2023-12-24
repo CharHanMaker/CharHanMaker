@@ -225,7 +225,7 @@ class MotorAngleTest : public Mode, Robot {
     // Gains
     Gain velGain = {
         .Kp = 0.0,
-        .Ki = 1.0,
+        .Ki = 0.8,
         .Kd = 0.0,
         .dt = 0.003};
 

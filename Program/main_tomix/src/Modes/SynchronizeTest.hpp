@@ -9,13 +9,8 @@ class SynchronizeTest : public Mode, Robot {
   public:
     SynchronizeTest(char letter, const char name[]) : Mode(letter, name) {}
 
-    // void init() { // 諸悪の根源
-    //     deviceBegin();
-    // }
-
     void before() {
         Serial.printf("loop %s\n", getModeName());
-
         /*　--------------------EEPROMからエンコーダの初期角度の読み込み-------------------- */
         // これをbeforeに書かないと初期角度をセットしないままで位置制御始まるので危ないよお
         Serial.println("===========================================");
@@ -29,13 +24,6 @@ class SynchronizeTest : public Mode, Robot {
         // ここまで
         /*　--------------------EEPROMからエンコーダの初期角度の読み込み-------------------- */
         login1();
-
-        highVel = 30 * PI / 180; // rad/s = 30[deg/s]
-        lowVel = 540 * PI / 180; // [deg/s]
-        for (size_t i = 0; i < 2; i++) {
-            // vel[i].target = lowVel;
-            vel[i].current = 0;
-        }
 
         motorA.setSaturation(65535, -65535);
         motorB.setSaturation(65535, -65535);
@@ -57,6 +45,13 @@ class SynchronizeTest : public Mode, Robot {
         Serial.setTimeout(5);
         isLoop = true;
 
+        volt[0] = 0;
+        volt[1] = 0;
+
+        vel[0].target = 0;
+        vel[1].target = 0;
+        targetVel = 0;
+
         turnMotorZeroPos();
     }
 
@@ -68,36 +63,61 @@ class SynchronizeTest : public Mode, Robot {
                 getSensors();
                 resetVolt();
 
-                // volt[0] = 1;
-                // volt[1] = 1;
-
-                // 目標の定速へPID
-                for (uint8_t i = 0; i < 2; i++) {
+                for (uint8_t i = 0; i < 2; i++) { // 速度制御
                     volt[i] += velCtrl(i, targetVel);
                 }
+                volt[0] += angleCtrl(0, angleContinuous[1].current); // 同期
 
-                // 角度同期
-                volt[0] += angleCtrl(0, angleContinuous[1].current);
-
-                // saturate input voltage
                 for (size_t i = 0; i < 2; i++) {
                     volt[i] = constrain(volt[i], -voltageLimit, voltageLimit);
                 }
 
-                // モータへ電圧を入力
                 motor[0]->runOpenloop(voltToDuty(volt[0]), true);
                 motor[1]->runOpenloop(voltToDuty(volt[1]), true);
 
-                // 結果を出力したい
-                Serial.printf("currentAng1:%.2f, vel1:%.2f, volt1:%.2f, currentAng2:%.2f, vel2:%.2f, volt2:%.2f, error:%.2f\n", angleContinuous[0].current, vel[0].current, volt[0], angleContinuous[1].current, vel[1].current, volt[1], angleContinuous[0].error);
+                Serial.printf("currentAng1:%.2f, vel1:%.2f, volt1::%.2f, currentAng2:%.2f, vel2:%.2f, volt2:%.2f, angleError:%.2f\n", angleContinuous[0].current, vel[0].current, volt[0], angleContinuous[1].current, vel[1].current, volt[1], angleContinuous[0].error);
             }
         }
 
-        motorA.stop();
-        motorB.stop();
-
         Serial.println("Send 'T' to reset");
         delay(1000);
+    }
+
+    void resetVolt() {
+        for (uint8_t i = 0; i < 2; i++) {
+            volt[i] = 0;
+        }
+    }
+
+    float velCtrl(uint8_t id, float targetVel) {
+        vel[id].target = targetVel;
+        vel[id].error = -(vel[id].target - vel[id].current); // これはmotorA.setCW()でなくせるはず
+        velPID[id].appendError(vel[id].error);
+        velPID[id].compute();
+        return vel[id].output = velPID[id].getPID();
+    }
+
+    void getSensors() {
+        for (size_t i = 0; i < 2; i++) {
+            // prev
+            angle[i].prev = angle[i].current;
+            angleContinuous[i].prev = angleContinuous[i].current;
+            vel[i].prev = vel[i].current;
+
+            // get Sensors
+            angle[i].current = AbsEncorders.readRadian(i);
+            angleContinuous[i].current = AbsEncorders.getContinuousRadian(i);
+            vel[i].current = AbsEncorders.getVelocity(i); //[rad/s]
+        }
+    }
+
+    float angleCtrl(uint8_t id, float targetAngle) {
+        // angleContinuous[0].target = 0; //目標値
+        angleContinuous[id].target = targetAngle;                                               // 目標値
+        angleContinuous[id].error = (angleContinuous[id].target - angleContinuous[id].current); // 偏差
+        angPID[id].appendError(angleContinuous[id].error);
+        angPID[id].compute();
+        return angleContinuous[id].output = angPID[id].getPID();
     }
 
     void getSerialData() {
@@ -115,48 +135,6 @@ class SynchronizeTest : public Mode, Robot {
         }
     }
 
-    void getSensors() {
-        for (size_t i = 0; i < 2; i++) {
-            // prev
-            angle[i].prev = angle[i].current;
-            angleContinuous[i].prev = angleContinuous[i].current;
-            vel[i].prev = vel[i].current;
-
-            // get Sensors
-            angle[i].current = AbsEncorders.readRadian(i);
-            angleContinuous[i].current = AbsEncorders.getContinuousRadian(i);
-            vel[i].current = AbsEncorders.getVelocity(i); //[rad/s]
-        }
-    }
-
-    void resetVolt() {
-        for (size_t i = 0; i < 2; i++) {
-            volt[i] = 0;
-        }
-    }
-
-    float velCtrl(uint8_t id, float targetVel) {
-        vel[id].target = targetVel;
-        vel[id].error = -(vel[id].target - vel[id].current); // これはmotorA.setCW()でなくせるはず
-        velPID[id].appendError(vel[id].error);
-        velPID[id].compute();
-        return vel[id].output = velPID[id].getPID();
-    }
-
-    float angleCtrl(uint8_t id, float targetAngle) {
-        // angleContinuous[0].target = 0; //目標値
-        angleContinuous[id].target = targetAngle;                                               // 目標値
-        angleContinuous[id].error = (angleContinuous[id].target - angleContinuous[id].current); // 偏差
-        angPID[id].appendError(angleContinuous[id].error);
-        angPID[id].compute();
-        return angleContinuous[id].output = angPID[id].getPID();
-    }
-
-    void saturateValue(float value, float absRange) { // volt : -absRange ~ +absRange [V]
-        absRange = abs(absRange);
-        value = constrain(value, -absRange, absRange);
-    }
-
     void turnMotorZeroPos() {
         bool isOk = false;
         int16_t c1, c2 = 0;
@@ -171,8 +149,11 @@ class SynchronizeTest : public Mode, Robot {
 
         while (!isOk) {
             getSensors();
-            angleCtrl(0, 0);
-            angleCtrl(1, 0);
+            volt[0] = angleCtrl(0, 0);
+            volt[1] = angleCtrl(1, 0);
+            motor[0]->runOpenloop(voltToDuty(volt[0]), true);
+            motor[1]->runOpenloop(voltToDuty(volt[1]), true);
+
             if (abs(angleContinuous[0].current) < 0.15) {
                 c1++;
                 motorA.stop();
@@ -208,6 +189,10 @@ class SynchronizeTest : public Mode, Robot {
         angPID[1].reset();
     }
 
+    void printVal(int i, float data) {
+        Serial.printf("angle:[%d]:%.2f ", i, data);
+    }
+
     void after() {
         Serial.printf("after %s\n", getModeName());
         motorA.stop();
@@ -215,27 +200,15 @@ class SynchronizeTest : public Mode, Robot {
     }
 
   private:
-    float highVel, lowVel;
     float volt[2];
 
+    // typedefs
     typedef struct {
         float Kp;
         float Ki;
         float Kd;
         float dt;
     } Gain;
-
-    Gain velGain = {
-        .Kp = 0.0,
-        .Ki = 1.0,
-        .Kd = 0.0,
-        .dt = 0.003};
-
-    Gain angGain = {
-        .Kp = 7.0,
-        .Ki = 0.1,
-        .Kd = 0.01,
-        .dt = 0.003};
 
     typedef struct {
         float target;
@@ -245,12 +218,28 @@ class SynchronizeTest : public Mode, Robot {
         float output;
     } ctrlValues;
 
+    // values for control
     ctrlValues angle[2];
     ctrlValues angleContinuous[2];
     ctrlValues vel[2];
 
+    // Motor def
     MotorPid *motor[2] = {&motorA, &motorB};
 
+    // Gains
+    Gain velGain = {
+        .Kp = 0.0,
+        .Ki = 0.8,
+        .Kd = 0.0,
+        .dt = 0.003};
+
+    Gain angGain = {
+        .Kp = 7.0,
+        .Ki = 0.1,
+        .Kd = 0.01,
+        .dt = 0.003};
+
+    // PID Objects
     PID velPID[2] = {
         PID(velGain.Kp, velGain.Ki, velGain.Kd, velGain.dt),
         PID(velGain.Kp, velGain.Ki, velGain.Kd, velGain.dt)};
@@ -265,15 +254,6 @@ class SynchronizeTest : public Mode, Robot {
     // functions
     int32_t voltToDuty(float volt) {
         return int32_t(volt * 65535 / 12);
-    }
-
-    // 今のところ使ってない
-    void synchronizeMotors() {
-        if (abs(angle[0].target - angle[0].current) < abs(angle[1].target - angle[1].current)) { // motorAのほうが目標角に追従出来ている
-            volt[1] += motorB.synchronizeControl(angle[0].current, angle[1].current);
-        } else if (abs(angle[0].target - angle[0].current) > abs(angle[1].target - angle[1].current)) { // motorBのほうが目標角に追従出来ている
-            volt[0] += motorA.synchronizeControl(angle[1].current, angle[0].current);
-        }
     }
 };
 
