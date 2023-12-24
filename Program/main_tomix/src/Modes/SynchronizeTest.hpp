@@ -53,6 +53,8 @@ class SynchronizeTest : public Mode, Robot {
         targetVel = 0;
 
         turnMotorZeroPos();
+
+        Serial.printf("currentAng1[rad], vel1[rad/s], volt1[V], currentAng2[rad], vel2[rad/s], volt2[V], angleError[rad]\n");
     }
 
     void loop() {
@@ -63,10 +65,9 @@ class SynchronizeTest : public Mode, Robot {
                 getSensors();
                 resetVolt();
 
-                for (uint8_t i = 0; i < 2; i++) { // 速度制御
-                    volt[i] += velCtrl(i, targetVel);
-                }
-                volt[0] += angleCtrl(0, angleContinuous[1].current); // 同期
+                volt[1] = velCtrl(1, targetVel);
+                volt[0] = volt[1] + angleCtrl(0, angleContinuous[1].current); // 同期
+                // angleCtrl(0, angleContinuous[1].current);
 
                 for (size_t i = 0; i < 2; i++) {
                     volt[i] = constrain(volt[i], -voltageLimit, voltageLimit);
@@ -75,7 +76,8 @@ class SynchronizeTest : public Mode, Robot {
                 motor[0]->runOpenloop(voltToDuty(volt[0]), true);
                 motor[1]->runOpenloop(voltToDuty(volt[1]), true);
 
-                Serial.printf("currentAng1:%.2f, vel1:%.2f, volt1::%.2f, currentAng2:%.2f, vel2:%.2f, volt2:%.2f, angleError:%.2f\n", angleContinuous[0].current, vel[0].current, volt[0], angleContinuous[1].current, vel[1].current, volt[1], angleContinuous[0].error);
+                // Serial.printf("currentAng1:%.2f, vel1:%.2f, volt1:%.2f, currentAng2:%.2f, vel2:%.2f, volt2:%.2f, angleError:%.2f\n", angleContinuous[0].current, vel[0].current, volt[0], angleContinuous[1].current, vel[1].current, volt[1], angleContinuous[0].error);
+                Serial.printf("%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f\n", angleContinuous[0].current, vel[0].current, volt[0], angleContinuous[1].current, vel[1].current, volt[1], angleContinuous[0].error);
             }
         }
 
@@ -235,7 +237,7 @@ class SynchronizeTest : public Mode, Robot {
 
     Gain angGain = {
         .Kp = 7.0,
-        .Ki = 0.1,
+        .Ki = 0.01,
         .Kd = 0.01,
         .dt = 0.003};
 
