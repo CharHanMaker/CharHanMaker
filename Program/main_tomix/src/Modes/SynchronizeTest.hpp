@@ -11,7 +11,7 @@ class SynchronizeTest : public Mode, Robot {
 
     void before() {
         Serial.printf("loop %s\n", getModeName());
-        /*　--------------------EEPROMからエンコーダの初期角度の読み込み-------------------- */
+        /* --------------------EEPROMからエンコーダの初期角度の読み込み-------------------- */
         // これをbeforeに書かないと初期角度をセットしないままで位置制御始まるので危ないよお
         Serial.println("===========================================");
         Serial.println("Read from EEPROM");
@@ -67,7 +67,8 @@ class SynchronizeTest : public Mode, Robot {
 
                 volt[1] = velCtrl(1, targetVel);
                 volt[0] = volt[1] + angleCtrl(0, angleContinuous[1].current); // 同期
-                // angleCtrl(0, angleContinuous[1].current);
+                // volt[0] += angleCtrl(0, angleContinuous[1].current);
+                // volt[0] += velCtrl(0, targetVel);
 
                 for (size_t i = 0; i < 2; i++) {
                     volt[i] = constrain(volt[i], -voltageLimit, voltageLimit);
@@ -144,15 +145,15 @@ class SynchronizeTest : public Mode, Robot {
         AbsEncorders.resetRotationCount(0);
         AbsEncorders.resetRotationCount(1);
 
-        angPID[0].setLimit(-4, 4);
+        angPID[0].setLimit(-2, 2);
         angPID[0].reset();
-        angPID[1].setLimit(-4, 4);
+        angPID[1].setLimit(-2, 2);
         angPID[1].reset();
 
         while (!isOk) {
             getSensors();
-            volt[0] = angleCtrl(0, 0);
-            volt[1] = angleCtrl(1, 0);
+            volt[0] = angleCtrl(0, Radians(10));
+            volt[1] = angleCtrl(1, Radians(10));
             motor[0]->runOpenloop(voltToDuty(volt[0]), true);
             motor[1]->runOpenloop(voltToDuty(volt[1]), true);
 
