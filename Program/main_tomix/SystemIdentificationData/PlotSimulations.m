@@ -4,7 +4,7 @@ file1 = 'Synchro_nishi.slx';
 file2 = 'Synchro_tommy.slx';
 file3 = 'TDoFCS.slx';
 
-sim(file1);
+sim(file3);
 
 targetAngleVel = synchro_vel.Data(:,1);
 vel0 = synchro_vel.Data(:,2);
