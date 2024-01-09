@@ -64,11 +64,15 @@ class SynchronizeTest : public Mode, Robot {
             } else {
                 getSensors();
                 resetVolt();
-
                 volt[1] = velCtrl(1, targetVel);
-                volt[0] = volt[1] + angleCtrl(0, angleContinuous[1].current); // 同期
-                // volt[0] += angleCtrl(0, angleContinuous[1].current);
-                // volt[0] += velCtrl(0, targetVel);
+
+                // 制御案1 位置制御のみ
+                // 制御案2 速度制御+位置制御
+                volt[0] += velCtrl(0, targetVel);
+                volt[0] += angleCtrl(0, angleContinuous[1].current);
+
+                // 制御案3 擬似FF
+                // volt[0] = volt[1] + angleCtrl(0, angleContinuous[1].current); // 同期
 
                 for (size_t i = 0; i < 2; i++) {
                     volt[i] = constrain(volt[i], -voltageLimit, voltageLimit);
