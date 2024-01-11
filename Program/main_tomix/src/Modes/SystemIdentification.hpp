@@ -18,9 +18,10 @@ class SystemIdentificationMode : public Mode, Robot {
     }
 
     void loop() {
-        Serial.println("Time[ms], Volt[V], Angle[rad], AngleVel[rad/s]");
+        Serial.println("Time[ms], Volt[V], Angle1[rad], AngleVel1[rad/s], Angle2[rad], AngleVel2[rad/s]");
         // initialize
         motorA.stop();
+        motorB.stop();
         for (size_t i = 0; i < 30; i++) {
             AbsEncorders.readDegree(0);
             AbsEncorders.readDegree(1);
@@ -31,7 +32,7 @@ class SystemIdentificationMode : public Mode, Robot {
         interval.reset();
         isDone = false;
         f = 0.1;
-        Serial.println("Time[ms], Volt[V], Angle[degree], AngleVel[rad/s]");
+        Serial.println("Time[ms], Volt[V], Angle1[rad], AngleVel1[rad/s], Angle2[rad], AngleVel2[rad/s]");
 
         while (!isDone) {
             if (interval.read_ms() >= 5) { // 周期依存 Ts = 0.005のとき5ms
@@ -41,6 +42,7 @@ class SystemIdentificationMode : public Mode, Robot {
         }
 
         motorA.stop();
+        motorB.stop();
         Serial.printf("end...Send T to continue\n");
         delay(10000);
     }
@@ -52,15 +54,19 @@ class SystemIdentificationMode : public Mode, Robot {
     void sysIdentification() {
         float encCnt; // エンコーダのカウント
         float omega;  // 角速度[rad/s]
+        float omega1;
         float theta;
+        float theta1;
         int u_pwm; // PWMのDuty比
 
         // NOTE: なぜなのか！？0番目のエンコーダの角度を取得しないと1番目のエンコーダの角度が取得できないｗｗｗｗｗｗｗｗｗｗｗｗ
-        theta = AbsEncorders.readDegree(0);
-        AbsEncorders.readDegree(1);
+        theta = AbsEncorders.readRadian(0);
+        theta1 = AbsEncorders.readRadian(1);
         omega = AbsEncorders.getVelocity(0);
+        omega1 = AbsEncorders.getVelocity(1);
 
-        Serial.printf("%d, %.3f, %.3f, %.3f\n", Time.read_ms(), u * 12, theta, omega);
+        // Time[ms], Volt[V], Angle1[rad], AngleVel1[rad/s], Angle2[rad], AngleVel2[rad/s]
+        Serial.printf("%d, %.3f, %.3f, %.3f, %.3f, %.3f\n", Time.read_ms(), u * 12, theta, omega, theta1, omega1);
 
         t += Ts; // 時間の更新
 
@@ -68,6 +74,7 @@ class SystemIdentificationMode : public Mode, Robot {
         u_pwm = int(u * 65535 / 2);      // 入力をPWMのDuty比に変換
 
         motorA.runOpenloop(u_pwm, true);
+        motorB.runOpenloop(u_pwm, true);
 
         // 入力周波数の更新
         if (t > 1 / f) {
@@ -83,6 +90,7 @@ class SystemIdentificationMode : public Mode, Robot {
         // 入力周波数が100Hz以上になったら終了
         if (f >= 100) {
             motorA.stop();
+            motorB.stop();
             isDone = true;
         }
     }

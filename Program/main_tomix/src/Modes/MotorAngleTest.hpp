@@ -1,17 +1,17 @@
-#ifndef __SynchronizeTest__
-#define __SynchronizeTest__
+#ifndef __MotorAngleTest__
+#define __MotorAngleTest__
 
 #include <./Modes/Mode.hpp>
 
-class SynchronizeTest : public Mode, Robot {
+class MotorAngleTest : public Mode, Robot {
     using Robot::Robot;
 
   public:
-    SynchronizeTest(char letter, const char name[]) : Mode(letter, name) {}
+    MotorAngleTest(char letter, const char name[]) : Mode(letter, name) {}
 
     void before() {
         Serial.printf("loop %s\n", getModeName());
-        /* --------------------EEPROMからエンコーダの初期角度の読み込み-------------------- */
+        /*　--------------------EEPROMからエンコーダの初期角度の読み込み-------------------- */
         // これをbeforeに書かないと初期角度をセットしないままで位置制御始まるので危ないよお
         Serial.println("===========================================");
         Serial.println("Read from EEPROM");
@@ -45,16 +45,11 @@ class SynchronizeTest : public Mode, Robot {
         Serial.setTimeout(5);
         isLoop = true;
 
-        volt[0] = 0;
-        volt[1] = 0;
-
         vel[0].target = 0;
         vel[1].target = 0;
         targetVel = 0;
 
         turnMotorZeroPos();
-
-        Serial.printf("currentAng1[rad], vel1[rad/s], volt1[V], currentAng2[rad], vel2[rad/s], volt2[V], angleError[rad]\n");
     }
 
     void loop() {
@@ -63,26 +58,8 @@ class SynchronizeTest : public Mode, Robot {
                 getSerialData();
             } else {
                 getSensors();
-                resetVolt();
-                volt[1] = velCtrl(1, targetVel);
-
-                // 制御案1 位置制御のみ
-                // 制御案2 速度制御+位置制御
-                volt[0] += velCtrl(0, targetVel);
-                volt[0] += angleCtrl(0, angleContinuous[1].current);
-
-                // 制御案3 擬似FF
-                // volt[0] = volt[1] + angleCtrl(0, angleContinuous[1].current); // 同期
-
-                for (size_t i = 0; i < 2; i++) {
-                    volt[i] = constrain(volt[i], -voltageLimit, voltageLimit);
-                }
-
-                motor[0]->runOpenloop(voltToDuty(volt[0]), true);
-                motor[1]->runOpenloop(voltToDuty(volt[1]), true);
-
-                // Serial.printf("currentAng1:%.2f, vel1:%.2f, volt1:%.2f, currentAng2:%.2f, vel2:%.2f, volt2:%.2f, angleError:%.2f\n", angleContinuous[0].current, vel[0].current, volt[0], angleContinuous[1].current, vel[1].current, volt[1], angleContinuous[0].error);
-                Serial.printf("%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f\n", angleContinuous[0].current, vel[0].current, volt[0], angleContinuous[1].current, vel[1].current, volt[1], angleContinuous[0].error);
+                velCtrl(1, targetVel);
+                angleCtrl(0, angleContinuous[1].current);
             }
         }
 
@@ -90,18 +67,13 @@ class SynchronizeTest : public Mode, Robot {
         delay(1000);
     }
 
-    void resetVolt() {
-        for (uint8_t i = 0; i < 2; i++) {
-            volt[i] = 0;
-        }
-    }
-
-    float velCtrl(uint8_t id, float targetVel) {
+    void velCtrl(uint8_t id, float targetVel) {
         vel[id].target = targetVel;
         vel[id].error = -(vel[id].target - vel[id].current); // これはmotorA.setCW()でなくせるはず
         velPID[id].appendError(vel[id].error);
         velPID[id].compute();
-        return vel[id].output = velPID[id].getPID();
+        vel[id].output = velPID[id].getPID();
+        motor[id]->runOpenloop(voltToDuty(vel[id].output), true);
     }
 
     void getSensors() {
@@ -118,13 +90,16 @@ class SynchronizeTest : public Mode, Robot {
         }
     }
 
-    float angleCtrl(uint8_t id, float targetAngle) {
+    void angleCtrl(uint8_t id, float targetAngle) {
         // angleContinuous[0].target = 0; //目標値
         angleContinuous[id].target = targetAngle;                                               // 目標値
         angleContinuous[id].error = (angleContinuous[id].target - angleContinuous[id].current); // 偏差
         angPID[id].appendError(angleContinuous[id].error);
         angPID[id].compute();
-        return angleContinuous[id].output = angPID[id].getPID();
+        angleContinuous[id].output = angPID[id].getPID();
+        motor[id]->runOpenloop(voltToDuty(angleContinuous[id].output), true);
+
+        Serial.printf("currentAng1:%.2f, vel1:%.2f, currentAng2:%.2f, vel2:%.2f, angleError:%.2f\n", angleContinuous[0].current, vel[0].current, angleContinuous[1].current, vel[1].current, angleContinuous[0].error);
     }
 
     void getSerialData() {
@@ -149,18 +124,15 @@ class SynchronizeTest : public Mode, Robot {
         AbsEncorders.resetRotationCount(0);
         AbsEncorders.resetRotationCount(1);
 
-        angPID[0].setLimit(-2, 2);
+        angPID[0].setLimit(-4, 4);
         angPID[0].reset();
-        angPID[1].setLimit(-2, 2);
+        angPID[1].setLimit(-4, 4);
         angPID[1].reset();
 
         while (!isOk) {
             getSensors();
-            volt[0] = angleCtrl(0, Radians(10));
-            volt[1] = angleCtrl(1, Radians(10));
-            motor[0]->runOpenloop(voltToDuty(volt[0]), true);
-            motor[1]->runOpenloop(voltToDuty(volt[1]), true);
-
+            angleCtrl(0, 0);
+            angleCtrl(1, 0);
             if (abs(angleContinuous[0].current) < 0.15) {
                 c1++;
                 motorA.stop();
@@ -194,6 +166,25 @@ class SynchronizeTest : public Mode, Robot {
         angPID[0].reset();
         angPID[1].setLimit(-voltageLimit, voltageLimit);
         angPID[1].reset();
+        // AbsEncorders.readDegree(0);
+        // AbsEncorders.readDegree(1);
+        // while (abs(AbsEncorders.readDegree(0)) > 0.1) {
+        //     AbsEncorders.readDegree(0);
+        //     AbsEncorders.readDegree(1);
+        //     motorA.runOpenloop(voltToDuty(2), true);
+        // }
+        // motorA.stop();
+        // AbsEncorders.resetRotationCount(0);
+
+        // AbsEncorders.readDegree(0);
+        // AbsEncorders.readDegree(1);
+        // while (abs(AbsEncorders.readDegree(1)) > 0.1) {
+        //     AbsEncorders.readDegree(0);
+        //     AbsEncorders.readDegree(1);
+        //     motorB.runOpenloop(voltToDuty(2), true);
+        // }
+        // motorB.stop();
+        // AbsEncorders.resetRotationCount(1);
     }
 
     void printVal(int i, float data) {
@@ -207,8 +198,6 @@ class SynchronizeTest : public Mode, Robot {
     }
 
   private:
-    float volt[2];
-
     // typedefs
     typedef struct {
         float Kp;
@@ -242,7 +231,7 @@ class SynchronizeTest : public Mode, Robot {
 
     Gain angGain = {
         .Kp = 7.0,
-        .Ki = 0.01,
+        .Ki = 0.1,
         .Kd = 0.01,
         .dt = 0.003};
 
@@ -264,6 +253,6 @@ class SynchronizeTest : public Mode, Robot {
     }
 };
 
-extern SynchronizeTest synchronizeTest;
+extern MotorAngleTest motorAngleTest;
 
 #endif

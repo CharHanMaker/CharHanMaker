@@ -34,6 +34,7 @@ class Robot {
     MultipleAS5600 AbsEncorders = MultipleAS5600(Wire, 0x70, 2);
     MotorPid motorA = MotorPid(CorePins::MotorPHA, CorePins::MotorENA, &AbsEncorders, 0);
     MotorPid motorB = MotorPid(CorePins::MotorPHB, CorePins::MotorENB, &AbsEncorders, 1);
+    
     sensors_t sensors;
 
     void deviceBegin() {
@@ -47,7 +48,7 @@ class Robot {
         Wire.begin();
         AbsEncorders.begin();
         AbsEncorders.setDirection(0, CCW);
-        AbsEncorders.setDirection(1, CCW);
+        AbsEncorders.setDirection(1, CW);
 
         // ピンの設定
         pinMode(CorePins::Buzzer, OUTPUT);
