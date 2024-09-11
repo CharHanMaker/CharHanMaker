@@ -2,9 +2,7 @@
 
 チャーハンの調理を自動化するCharHan!!というロボットを作りました。
 
-<div>
-<iframe width="600" height="400" src="https://www.youtube.com/embed/2m1POazWTIs"></iframe>
-</div>
+[![CharHan!! 動画](https://img.youtube.com/vi/2m1POazWTIs/hqdefault.jpg)](https://www.youtube.com/watch?v=2m1POazWTIs)
 
 ## 🔥CharHan!!機械概要
 
